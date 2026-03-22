@@ -1,0 +1,87 @@
+import { create } from 'zustand';
+
+export interface EditorTab {
+  specFileId: string;
+  filePath: string;
+  title: string;
+  content: string;
+  dirty: boolean;
+}
+
+interface EditorState {
+  tabs: EditorTab[];
+  activeTabId: string | null;
+  openOrFocusTab: (tab: Omit<EditorTab, 'dirty'> & { dirty?: boolean }) => void;
+  closeTab: (specFileId: string) => void;
+  setActiveTab: (specFileId: string | null) => void;
+  setTabContent: (specFileId: string, content: string) => void;
+  markTabSaved: (specFileId: string, content: string) => void;
+}
+
+export const useEditorStore = create<EditorState>((set, get) => ({
+  tabs: [],
+  activeTabId: null,
+
+  openOrFocusTab: (tab) => {
+    const { tabs } = get();
+    const existing = tabs.find((t) => t.specFileId === tab.specFileId);
+    if (existing) {
+      set({
+        activeTabId: tab.specFileId,
+        tabs: tabs.map((t) =>
+          t.specFileId === tab.specFileId
+            ? {
+                ...t,
+                content: tab.content,
+                dirty: tab.dirty ?? t.dirty,
+              }
+            : t,
+        ),
+      });
+      return;
+    }
+    const next: EditorTab = {
+      specFileId: tab.specFileId,
+      filePath: tab.filePath,
+      title: tab.title,
+      content: tab.content,
+      dirty: tab.dirty ?? false,
+    };
+    set({ tabs: [...tabs, next], activeTabId: tab.specFileId });
+  },
+
+  closeTab: (specFileId) => {
+    const { tabs, activeTabId } = get();
+    const idx = tabs.findIndex((t) => t.specFileId === specFileId);
+    if (idx < 0) return;
+    const nextTabs = tabs.filter((t) => t.specFileId !== specFileId);
+    let nextActive = activeTabId;
+    if (activeTabId === specFileId) {
+      nextActive =
+        nextTabs[idx - 1]?.specFileId ?? nextTabs[idx]?.specFileId ?? null;
+    }
+    set({ tabs: nextTabs, activeTabId: nextActive });
+  },
+
+  setActiveTab: (specFileId) => set({ activeTabId: specFileId }),
+
+  setTabContent: (specFileId, content) => {
+    set({
+      tabs: get().tabs.map((t) =>
+        t.specFileId === specFileId
+          ? { ...t, content, dirty: true }
+          : t,
+      ),
+    });
+  },
+
+  markTabSaved: (specFileId, content) => {
+    set({
+      tabs: get().tabs.map((t) =>
+        t.specFileId === specFileId
+          ? { ...t, content, dirty: false }
+          : t,
+      ),
+    });
+  },
+}));
