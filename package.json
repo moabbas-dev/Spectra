@@ -9,7 +9,7 @@
     "dev": "npm run build:electron && node node_modules/concurrently/dist/bin/concurrently.js -k \"npm run dev:vite\" \"npm run dev:electron\"",
     "dev:vite": "node node_modules/vite/bin/vite.js",
     "dev:electron": "node node_modules/wait-on/bin/wait-on tcp:5173 && node node_modules/cross-env/src/bin/cross-env.js VITE_DEV_SERVER_URL=http://localhost:5173 node node_modules/electron/cli.js .",
-    "build:electron": "node node_modules/typescript/bin/tsc -p tsconfig.electron.json",
+    "build:electron": "node node_modules/typescript/bin/tsc -p tsconfig.electron.json && node -e \"require('fs').cpSync('electron/db/migrations', 'dist-electron/electron/db/migrations', {recursive:true, force:true})\"",
     "build:electron:watch": "node node_modules/typescript/bin/tsc -p tsconfig.electron.json --watch",
     "build": "npm run build:electron && node node_modules/vite/bin/vite.js build",
     "dist": "npm run build && npx --yes electron-builder",
@@ -18,9 +18,11 @@
     "rebuild:native": "npx --yes @electron/rebuild"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
     "better-sqlite3": "^11.6.0",
     "electron-log": "^5.2.4",
-    "js-yaml": "^4.1.1"
+    "js-yaml": "^4.1.1",
+    "monaco-editor": "^0.55.1"
   },
   "devDependencies": {
     "@electron/rebuild": "^3.7.0",

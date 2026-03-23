@@ -14,7 +14,7 @@ export interface EditorTab {
 interface EditorState {
   tabs: EditorTab[];
   activeTabId: string | null;
-  openOrFocusTab: (tab: Omit<EditorTab, 'dirty'> & { dirty?: boolean }) => void;
+  openOrFocusTab: (tab: Omit<EditorTab, 'dirty' | 'activeView'> & { dirty?: boolean; activeView?: EditorView }) => void;
   closeTab: (specFileId: string) => void;
   closeOtherTabs: (specFileId: string) => void;
   closeAllTabs: () => void;

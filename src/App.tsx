@@ -113,6 +113,27 @@ export function App() {
     return unsub;
   }, [ipc]);
 
+  /* ── Autosave every 30 seconds ── */
+  useEffect(() => {
+    const AUTOSAVE_INTERVAL = 30_000;
+    const timer = setInterval(async () => {
+      const { tabs, markTabSaved } = useEditorStore.getState();
+      for (const tab of tabs) {
+        if (!tab.dirty) continue;
+        try {
+          await ipc(IPC.FS_WRITE_FILE, {
+            path: tab.filePath,
+            content: tab.content,
+          });
+          markTabSaved(tab.specFileId, tab.content);
+        } catch {
+          /* silently skip — file might be locked */
+        }
+      }
+    }, AUTOSAVE_INTERVAL);
+    return () => clearInterval(timer);
+  }, [ipc]);
+
   /* ── Global keyboard shortcuts ── */
   useEffect(() => {
     async function saveActiveTab() {
