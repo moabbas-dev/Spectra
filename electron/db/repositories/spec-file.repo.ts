@@ -167,6 +167,18 @@ export function deleteSpecFileById(db: Database, id: string): void {
   db.prepare('DELETE FROM spec_files WHERE id = ?').run(id);
 }
 
+export function updateSpecFileFolderAndPath(
+  db: Database,
+  id: string,
+  folderId: string | null,
+  filePath: string,
+): void {
+  const now = Date.now();
+  db.prepare(
+    `UPDATE spec_files SET folder_id = ?, file_path = ?, updated_at = ? WHERE id = ?`,
+  ).run(folderId, filePath, now, id);
+}
+
 export function listQuickOpenEntries(
   db: Database,
   workspaceId: string,

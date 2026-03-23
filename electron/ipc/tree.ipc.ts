@@ -5,8 +5,9 @@ import path from 'node:path';
 import type {
   CreateFolderInput,
   CreateSpecFileInput,
+  MoveFolderInput,
+  MoveSpecFileInput,
   ProjectTreeSnapshot,
-  QuickOpenEntry,
   RenameFolderInput,
   RenameSpecFileInput,
 } from '../../shared/ipc-payloads';
@@ -247,5 +248,84 @@ export function registerTreeIpc(db: Database, handle: HandleFn): void {
     const updated = specFileRepo.getSpecFileById(db, row.id);
     if (!updated) throw new Error('Spec file missing after rename');
     return updated;
+  });
+
+  /* ── Move folder (drag-and-drop) ── */
+  handle(IPC.FOLDER_MOVE, async (_e, payload: unknown) => {
+    const input = payload as MoveFolderInput;
+    const folder = folderRepo.getFolderById(db, input.folderId);
+    if (!folder) throw new Error('Folder not found');
+
+    const root = getProjectRootAbsolute(db, folder.projectId);
+    const oldRel = folder.path;
+    const oldAbs = path.join(root, oldRel);
+
+    let newRel: string;
+    if (input.newParentFolderId) {
+      const parent = folderRepo.getFolderById(db, input.newParentFolderId);
+      if (!parent || parent.projectId !== folder.projectId) {
+        throw new Error('Target folder not found');
+      }
+      newRel = path.join(parent.path, folder.name);
+    } else {
+      newRel = folder.name;
+    }
+
+    if (newRel === oldRel) return folder;
+
+    const newAbs = path.join(root, newRel);
+    await fs.rename(oldAbs, newAbs);
+
+    /* Update this folder and all descendants */
+    const allFolders = folderRepo.listFoldersByProject(db, folder.projectId);
+    const oldPrefix = oldRel + path.sep;
+    for (const f of allFolders) {
+      if (f.id === folder.id) {
+        folderRepo.updateFolderParent(db, f.id, input.newParentFolderId, folder.name, newRel);
+      } else if (f.path.startsWith(oldPrefix)) {
+        const updatedRel = newRel + path.sep + f.path.slice(oldPrefix.length);
+        folderRepo.updateFolderPathAndName(db, f.id, f.name, updatedRel);
+      }
+    }
+
+    /* Update file paths */
+    const files = specFileRepo.listSpecFilesByProject(db, folder.projectId);
+    const oldAbsPrefix = oldAbs + path.sep;
+    for (const sf of files) {
+      if (sf.filePath.startsWith(oldAbsPrefix) || sf.filePath === oldAbs) {
+        const nextFp = newAbs + sf.filePath.slice(oldAbs.length);
+        specFileRepo.updateSpecFileNameAndPath(db, sf.id, sf.name, nextFp);
+      }
+    }
+
+    return folderRepo.getFolderById(db, input.folderId);
+  });
+
+  /* ── Move spec file (drag-and-drop) ── */
+  handle(IPC.SPEC_FILE_MOVE, async (_e, payload: unknown) => {
+    const input = payload as MoveSpecFileInput;
+    const row = specFileRepo.getSpecFileById(db, input.specFileId);
+    if (!row) throw new Error('Spec file not found');
+
+    const root = getProjectRootAbsolute(db, row.projectId);
+    const fileName = path.basename(row.filePath);
+    let newAbs: string;
+
+    if (input.newFolderId) {
+      const folder = folderRepo.getFolderById(db, input.newFolderId);
+      if (!folder || folder.projectId !== row.projectId) {
+        throw new Error('Target folder not found');
+      }
+      newAbs = path.join(root, folder.path, fileName);
+    } else {
+      newAbs = path.join(root, fileName);
+    }
+
+    if (newAbs === row.filePath) return row;
+
+    await fs.rename(row.filePath, newAbs);
+    specFileRepo.updateSpecFileFolderAndPath(db, row.id, input.newFolderId, newAbs);
+
+    return specFileRepo.getSpecFileById(db, row.id);
   });
 }

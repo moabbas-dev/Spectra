@@ -15,10 +15,12 @@ export const IPC = {
   FOLDER_CREATE: 'folder:create',
   FOLDER_RENAME: 'folder:rename',
   FOLDER_DELETE: 'folder:delete',
+  FOLDER_MOVE: 'folder:move',
 
   SPEC_FILE_CREATE: 'spec-file:create',
   SPEC_FILE_DELETE: 'spec-file:delete',
   SPEC_FILE_RENAME: 'spec-file:rename',
+  SPEC_FILE_MOVE: 'spec-file:move',
 
   QUICK_OPEN_LIST: 'quick-open:list',
 
@@ -47,6 +49,9 @@ export const IPC = {
 
   VALIDATE_SPEC: 'validate:spec',
   VALIDATE_REALTIME: 'validate:realtime',
+
+  SETTINGS_GET: 'settings:get',
+  SETTINGS_SET: 'settings:set',
 } as const;
 
 export type IpcChannel = (typeof IPC)[keyof typeof IPC];

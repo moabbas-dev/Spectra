@@ -5,6 +5,7 @@ import { logger } from '../utils/logger.util';
 import { registerFsIpc } from './fs.ipc';
 import { registerGitIpc } from './git.ipc';
 import { registerProjectIpc } from './project.ipc';
+import { registerSettingsIpc } from './settings.ipc';
 import { registerSpecIpc } from './spec.ipc';
 import { registerTreeIpc } from './tree.ipc';
 import { registerValidationIpc } from './validation.ipc';
@@ -38,4 +39,5 @@ export function registerAllIpc(db: Database): void {
   registerGitIpc(handle, IPC);
   registerVersionIpc(handle, IPC);
   registerValidationIpc(handle, IPC);
+  registerSettingsIpc(db, handle);
 }

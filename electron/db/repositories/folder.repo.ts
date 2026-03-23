@@ -100,6 +100,18 @@ export function updateFolderPathAndName(
   ).run(name, relPath, folderId);
 }
 
+export function updateFolderParent(
+  db: Database,
+  folderId: string,
+  parentFolderId: string | null,
+  name: string,
+  relPath: string,
+): void {
+  db.prepare(
+    `UPDATE folders SET parent_folder_id = ?, name = ?, path = ? WHERE id = ?`,
+  ).run(parentFolderId, name, relPath, folderId);
+}
+
 export function deleteFolderById(db: Database, id: string): void {
   db.prepare('DELETE FROM folders WHERE id = ?').run(id);
 }

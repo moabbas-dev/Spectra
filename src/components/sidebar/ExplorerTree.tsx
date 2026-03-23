@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type DragEvent, type ReactNode } from 'react';
 import {
   ChevronDown,
   ChevronRight,
@@ -25,6 +25,10 @@ type MenuState =
     }
   | null;
 
+/* Drag-and-drop data transfer keys */
+const DRAG_TYPE_FOLDER = 'spectra/folder-id';
+const DRAG_TYPE_FILE = 'spectra/file-id';
+
 export function ExplorerTree({ projectId }: ExplorerTreeProps) {
   const ipc = useIPC();
   const treeRevision = useProjectsStore((s) => s.treeRevision);
@@ -37,6 +41,7 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
   const [specDialog, setSpecDialog] = useState<{
     folderId: string | null;
   } | null>(null);
+  const [dropTarget, setDropTarget] = useState<string | null>(null); // folderId or '__root__'
 
   const loadTree = useCallback(async () => {
     const snap = await ipc<ProjectTreeSnapshot>(IPC.PROJECT_TREE_GET, projectId);
@@ -124,6 +129,65 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
     bumpTree();
   }
 
+  /* ── Drag-and-drop handlers ── */
+  function onDragStartFolder(e: DragEvent, folder: FolderRow) {
+    e.stopPropagation();
+    e.dataTransfer.setData(DRAG_TYPE_FOLDER, folder.id);
+    e.dataTransfer.effectAllowed = 'move';
+  }
+
+  function onDragStartFile(e: DragEvent, file: SpecFileRow) {
+    e.stopPropagation();
+    e.dataTransfer.setData(DRAG_TYPE_FILE, file.id);
+    e.dataTransfer.effectAllowed = 'move';
+  }
+
+  function onDragOver(e: DragEvent, targetId: string) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'move';
+    setDropTarget(targetId);
+  }
+
+  function onDragLeave(e: DragEvent) {
+    e.stopPropagation();
+    setDropTarget(null);
+  }
+
+  async function onDrop(e: DragEvent, targetFolderId: string | null) {
+    e.preventDefault();
+    e.stopPropagation();
+    setDropTarget(null);
+
+    const folderId = e.dataTransfer.getData(DRAG_TYPE_FOLDER);
+    const fileId = e.dataTransfer.getData(DRAG_TYPE_FILE);
+
+    if (folderId) {
+      // Don't drop a folder into itself
+      if (folderId === targetFolderId) return;
+      try {
+        await ipc(IPC.FOLDER_MOVE, {
+          folderId,
+          newParentFolderId: targetFolderId,
+        });
+        bumpTree();
+      } catch (err) {
+        console.error('Folder move failed:', err);
+      }
+    } else if (fileId) {
+      try {
+        await ipc(IPC.SPEC_FILE_MOVE, {
+          specFileId: fileId,
+          newFolderId: targetFolderId,
+        });
+        bumpTree();
+      } catch (err) {
+        console.error('File move failed:', err);
+      }
+    }
+  }
+
+  /* ── Context menu builders ── */
   function onProjectRootContext(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
@@ -204,14 +268,22 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
 
   function renderFolder(folder: FolderRow, depth: number): ReactNode {
     const open = expanded[folder.id] ?? true;
-    const children = tree.folders.filter((f) => f.parentFolderId === folder.id);
-    const filesHere = tree.files.filter((f) => f.folderId === folder.id);
+    const children = tree!.folders.filter((f) => f.parentFolderId === folder.id);
+    const filesHere = tree!.files.filter((f) => f.folderId === folder.id);
+    const isDropTarget = dropTarget === folder.id;
 
     return (
       <div key={folder.id} className="select-none">
         <div
-          className="flex cursor-pointer items-center gap-0.5 rounded px-1 py-0.5 text-xs text-gray-300 hover:bg-shell-hover"
+          className={`flex cursor-pointer items-center gap-0.5 rounded px-1 py-0.5 text-xs text-gray-300 hover:bg-shell-hover ${
+            isDropTarget ? 'ring-1 ring-blue-500 bg-blue-500/10' : ''
+          }`}
           style={{ paddingLeft: 4 + depth * 12 }}
+          draggable
+          onDragStart={(e) => onDragStartFolder(e, folder)}
+          onDragOver={(e) => onDragOver(e, folder.id)}
+          onDragLeave={onDragLeave}
+          onDrop={(e) => void onDrop(e, folder.id)}
           onContextMenu={(e) => onFolderContext(e, folder)}
           onClick={() => toggleFolder(folder.id)}
           onDoubleClick={() => toggleFolder(folder.id)}
@@ -239,6 +311,8 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
                 type="button"
                 className="flex w-full cursor-pointer items-center gap-1 rounded py-0.5 pl-6 pr-1 text-left text-xs text-gray-400 hover:bg-shell-hover hover:text-gray-200"
                 style={{ paddingLeft: 8 + (depth + 1) * 12 }}
+                draggable
+                onDragStart={(e) => onDragStartFile(e, file)}
                 onContextMenu={(e) => onFileContext(e, file)}
                 onClick={() => void openFile(file)}
               >
@@ -257,10 +331,17 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
     );
   }
 
+  const isRootDropTarget = dropTarget === '__root__';
+
   return (
     <div
-      className="border-t border-shell-border px-1 py-1"
+      className={`border-t border-shell-border px-1 py-1 ${
+        isRootDropTarget ? 'ring-1 ring-blue-500 bg-blue-500/10' : ''
+      }`}
       onContextMenu={onProjectRootContext}
+      onDragOver={(e) => onDragOver(e, '__root__')}
+      onDragLeave={onDragLeave}
+      onDrop={(e) => void onDrop(e, null)}
     >
       <div className="mb-1 px-1 text-[10px] font-semibold uppercase text-gray-500">
         Files
@@ -272,6 +353,8 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
           type="button"
           className="flex w-full cursor-pointer items-center gap-1 rounded px-1 py-0.5 text-left text-xs text-gray-400 hover:bg-shell-hover hover:text-gray-200"
           style={{ paddingLeft: 8 }}
+          draggable
+          onDragStart={(e) => onDragStartFile(e, file)}
           onContextMenu={(e) => onFileContext(e, file)}
           onClick={() => void openFile(file)}
         >

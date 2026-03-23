@@ -118,3 +118,13 @@ export interface QuickOpenEntry {
   filePath: string;
   openapiVersion: string;
 }
+
+export interface MoveFolderInput {
+  folderId: string;
+  newParentFolderId: string | null;
+}
+
+export interface MoveSpecFileInput {
+  specFileId: string;
+  newFolderId: string | null;
+}

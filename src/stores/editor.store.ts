@@ -1,11 +1,14 @@
 import { create } from 'zustand';
 
+export type EditorView = 'form' | 'code';
+
 export interface EditorTab {
   specFileId: string;
   filePath: string;
   title: string;
   content: string;
   dirty: boolean;
+  activeView: EditorView;
 }
 
 interface EditorState {
@@ -13,8 +16,11 @@ interface EditorState {
   activeTabId: string | null;
   openOrFocusTab: (tab: Omit<EditorTab, 'dirty'> & { dirty?: boolean }) => void;
   closeTab: (specFileId: string) => void;
+  closeOtherTabs: (specFileId: string) => void;
+  closeAllTabs: () => void;
   setActiveTab: (specFileId: string | null) => void;
   setTabContent: (specFileId: string, content: string) => void;
+  setActiveView: (specFileId: string, view: EditorView) => void;
   markTabSaved: (specFileId: string, content: string) => void;
 }
 
@@ -46,6 +52,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       title: tab.title,
       content: tab.content,
       dirty: tab.dirty ?? false,
+      activeView: 'code',
     };
     set({ tabs: [...tabs, next], activeTabId: tab.specFileId });
   },
@@ -63,6 +70,16 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     set({ tabs: nextTabs, activeTabId: nextActive });
   },
 
+  closeOtherTabs: (specFileId) => {
+    const { tabs } = get();
+    const keep = tabs.filter((t) => t.specFileId === specFileId);
+    set({ tabs: keep, activeTabId: specFileId });
+  },
+
+  closeAllTabs: () => {
+    set({ tabs: [], activeTabId: null });
+  },
+
   setActiveTab: (specFileId) => set({ activeTabId: specFileId }),
 
   setTabContent: (specFileId, content) => {
@@ -71,6 +88,14 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         t.specFileId === specFileId
           ? { ...t, content, dirty: true }
           : t,
+      ),
+    });
+  },
+
+  setActiveView: (specFileId, view) => {
+    set({
+      tabs: get().tabs.map((t) =>
+        t.specFileId === specFileId ? { ...t, activeView: view } : t,
       ),
     });
   },
