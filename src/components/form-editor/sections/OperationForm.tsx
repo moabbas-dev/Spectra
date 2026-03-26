@@ -1,4 +1,4 @@
-import type { OperationObject, ParameterObject, RequestBodyObject, ResponseObject } from '../../../types/openapi.types';
+import type { OperationObject } from '../../../types/openapi.types';
 import { FormField, inputClass, textareaClass } from '../FormField';
 import { ParametersForm } from './ParametersForm';
 import { RequestBodyForm } from './RequestBodyForm';

@@ -1,6 +1,7 @@
 import { useWorkspaceStore } from '../../stores/workspace.store';
 import { useEditorStore } from '../../stores/editor.store';
-import { Circle } from 'lucide-react';
+import { useValidationStore } from '../../stores/validation.store';
+import { Circle, AlertCircle, AlertTriangle } from 'lucide-react';
 
 export function StatusBar() {
   const activeId = useWorkspaceStore((s) => s.activeWorkspaceId);
@@ -10,6 +11,11 @@ export function StatusBar() {
   const tabs = useEditorStore((s) => s.tabs);
   const activeTabId = useEditorStore((s) => s.activeTabId);
   const activeTab = tabs.find((t) => t.specFileId === activeTabId);
+
+  const issues = useValidationStore((s) => s.issues);
+  const isValidating = useValidationStore((s) => s.isValidating);
+  const errorCount = issues.filter((i) => i.severity === 'error').length;
+  const warningCount = issues.filter((i) => i.severity === 'warning').length;
 
   return (
     <footer
@@ -31,6 +37,34 @@ export function StatusBar() {
             )}
             {activeTab.title}
           </span>
+        </>
+      )}
+
+      {/* Validation counts */}
+      {activeTab && (errorCount > 0 || warningCount > 0) && (
+        <>
+          <span className="text-gray-500">|</span>
+          <span className="flex items-center gap-2">
+            {errorCount > 0 && (
+              <span className="flex items-center gap-0.5 text-red-400" title={`${errorCount} error(s)`}>
+                <AlertCircle className="h-3 w-3" />
+                {errorCount}
+              </span>
+            )}
+            {warningCount > 0 && (
+              <span className="flex items-center gap-0.5 text-amber-400" title={`${warningCount} warning(s)`}>
+                <AlertTriangle className="h-3 w-3" />
+                {warningCount}
+              </span>
+            )}
+          </span>
+        </>
+      )}
+
+      {isValidating && (
+        <>
+          <span className="text-gray-500">|</span>
+          <span className="text-[10px] text-gray-500 animate-pulse">Validating…</span>
         </>
       )}
 

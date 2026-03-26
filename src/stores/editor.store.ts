@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type EditorView = 'form' | 'code';
+export type EditorView = 'form' | 'code' | 'preview' | 'history' | 'validate';
 
 export interface EditorTab {
   specFileId: string;

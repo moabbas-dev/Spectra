@@ -19,10 +19,13 @@
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
+    "@stoplight/spectral-core": "^1.21.0",
+    "@stoplight/spectral-rulesets": "^1.22.0",
     "better-sqlite3": "^11.6.0",
     "electron-log": "^5.2.4",
     "js-yaml": "^4.1.1",
-    "monaco-editor": "^0.55.1"
+    "monaco-editor": "^0.55.1",
+    "swagger-ui-react": "^5.32.1"
   },
   "devDependencies": {
     "@electron/rebuild": "^3.7.0",
@@ -31,6 +34,7 @@
     "@types/node": "^22.10.1",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "@types/swagger-ui-react": "^5.18.0",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "concurrently": "^9.1.0",
