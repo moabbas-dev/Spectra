@@ -4,10 +4,12 @@ import { useUiStore } from '../../stores/ui.store';
 
 export function Sidebar() {
   const panel = useUiStore((s) => s.sidebarPanel);
+  const sidebarWidth = useUiStore((s) => s.sidebarWidth);
 
   return (
     <aside
-      className="flex w-64 shrink-0 flex-col border-r border-shell-border bg-shell-sidebar"
+      className="flex shrink-0 flex-col border-r border-shell-border bg-shell-sidebar"
+      style={{ width: sidebarWidth }}
       aria-label="Side bar"
     >
       <div className="border-b border-shell-border px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-gray-400">

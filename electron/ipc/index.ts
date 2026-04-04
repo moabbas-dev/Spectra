@@ -11,6 +11,7 @@ import { registerTreeIpc } from './tree.ipc';
 import { registerValidationIpc } from './validation.ipc';
 import { registerVersionIpc } from './version.ipc';
 import { registerWorkspaceIpc } from './workspace.ipc';
+import { registerImportExportIpc } from './import-export.ipc';
 
 export function registerAllIpc(db: Database): void {
   const handle = (
@@ -39,5 +40,6 @@ export function registerAllIpc(db: Database): void {
   registerGitIpc(handle, IPC);
   registerVersionIpc(handle, IPC);
   registerValidationIpc(handle, IPC);
+  registerImportExportIpc(handle, IPC);
   registerSettingsIpc(db, handle);
 }

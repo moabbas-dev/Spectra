@@ -12,6 +12,8 @@ import { useIPC } from '../../hooks/useIPC';
 import { useEditorStore } from '../../stores/editor.store';
 import { useProjectsStore } from '../../stores/projects.store';
 import { CreateSpecDialog } from '../dialogs/CreateSpecDialog';
+import { ImportDialog } from '../dialogs/ImportDialog';
+import { ExportDialog } from '../dialogs/ExportDialog';
 
 interface ExplorerTreeProps {
   projectId: string;
@@ -42,6 +44,8 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
     folderId: string | null;
   } | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null); // folderId or '__root__'
+  const [importDialog, setImportDialog] = useState<{ folderId: string | null } | null>(null);
+  const [exportDialog, setExportDialog] = useState<{ content: string; fileName: string } | null>(null);
 
   const loadTree = useCallback(async () => {
     const snap = await ipc<ProjectTreeSnapshot>(IPC.PROJECT_TREE_GET, projectId);
@@ -203,6 +207,10 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
           label: 'New OpenAPI file…',
           onClick: () => setSpecDialog({ folderId: null }),
         },
+        {
+          label: 'Import file…',
+          onClick: () => setImportDialog({ folderId: null }),
+        },
       ],
     });
   }
@@ -221,6 +229,10 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
         {
           label: 'New OpenAPI file…',
           onClick: () => setSpecDialog({ folderId: folder.id }),
+        },
+        {
+          label: 'Import file…',
+          onClick: () => setImportDialog({ folderId: folder.id }),
         },
         {
           label: 'Rename',
@@ -245,6 +257,20 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
         {
           label: 'Open',
           onClick: () => void openFile(file),
+        },
+        {
+          label: 'Export file…',
+          onClick: async () => {
+            try {
+              const { content } = await ipc<{ content: string }>(
+                IPC.FS_READ_FILE,
+                file.filePath,
+              );
+              setExportDialog({ content, fileName: file.name });
+            } catch (err) {
+              console.error('Failed to read file for export:', err);
+            }
+          },
         },
         {
           label: 'Rename',
@@ -406,6 +432,26 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
             setSpecDialog(null);
             bumpTree();
           }}
+        />
+      ) : null}
+
+      {importDialog ? (
+        <ImportDialog
+          projectId={projectId}
+          folderId={importDialog.folderId}
+          onClose={() => setImportDialog(null)}
+          onImported={() => {
+            setImportDialog(null);
+            bumpTree();
+          }}
+        />
+      ) : null}
+
+      {exportDialog ? (
+        <ExportDialog
+          content={exportDialog.content}
+          fileName={exportDialog.fileName}
+          onClose={() => setExportDialog(null)}
         />
       ) : null}
 

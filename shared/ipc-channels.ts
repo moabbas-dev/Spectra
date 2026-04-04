@@ -34,6 +34,9 @@ export const IPC = {
   SPEC_VALIDATE: 'spec:validate',
   SPEC_FORMAT: 'spec:format',
   SPEC_DUPLICATE: 'spec:duplicate',
+  SPEC_IMPORT: 'spec:import',
+  SPEC_EXPORT: 'spec:export',
+  PROJECT_EXPORT_ZIP: 'project:export-zip',
 
   VERSION_CREATE: 'version:create',
   VERSION_LIST: 'version:list',

@@ -1,4 +1,4 @@
-import { FileText, Code2, Eye, History, CheckCircle } from 'lucide-react';
+import { FileText, Code2, Eye, History } from 'lucide-react';
 import { useEditorStore, type EditorView } from '../../stores/editor.store';
 
 interface Props {
@@ -10,7 +10,6 @@ const views: { key: EditorView; label: string; icon: typeof FileText }[] = [
   { key: 'code', label: 'Code', icon: Code2 },
   { key: 'preview', label: 'Preview', icon: Eye },
   { key: 'history', label: 'History', icon: History },
-  { key: 'validate', label: 'Validate', icon: CheckCircle },
 ];
 
 export function EditorViewSwitcher({ specFileId }: Props) {
