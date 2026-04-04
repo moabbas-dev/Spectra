@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Briefcase } from 'lucide-react';
+import { ChevronDown, ChevronRight, Plus } from 'lucide-react';
 import { IPC } from '@shared/ipc-channels';
 import type { ProjectRow } from '@shared/ipc-payloads';
 import { useIPC } from '../../hooks/useIPC';
@@ -11,16 +11,19 @@ export function ProjectTree() {
   const ipc = useIPC();
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
   const projects = useProjectsStore((s) => s.projects);
-  const selectedProjectId = useProjectsStore((s) => s.selectedProjectId);
   const setProjects = useProjectsStore((s) => s.setProjects);
-  const setSelectedProjectId = useProjectsStore(
-    (s) => s.setSelectedProjectId,
-  );
   const bumpTree = useProjectsStore((s) => s.bumpTree);
 
+  /* Track which projects are expanded (all expanded by default) */
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [showAddForm, setShowAddForm] = useState(false);
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const toggleProject = (id: string) => {
+    setCollapsed((c) => ({ ...c, [id]: !c[id] }));
+  };
 
   async function handleAddProject(e: FormEvent) {
     e.preventDefault();
@@ -36,7 +39,7 @@ export function ProjectTree() {
     setBusy(true);
     setError(null);
     try {
-      const created = await ipc<ProjectRow>(IPC.PROJECT_CREATE, {
+      await ipc<ProjectRow>(IPC.PROJECT_CREATE, {
         workspaceId: activeWorkspaceId,
         name: trimmed,
       });
@@ -45,8 +48,8 @@ export function ProjectTree() {
         activeWorkspaceId,
       );
       setProjects(list);
-      setSelectedProjectId(created.id);
       setName('');
+      setShowAddForm(false);
       bumpTree();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -64,66 +67,86 @@ export function ProjectTree() {
   }
 
   return (
-    <div className="p-2">
-      <div className="mb-1 text-[10px] font-semibold uppercase text-gray-500">
-        Projects
-      </div>
-      <ul className="mb-2 space-y-0.5">
-        {projects.length === 0 ? (
-          <li className="text-xs text-gray-500">No projects yet.</li>
-        ) : (
-          projects.map((p) => {
-            const selected = p.id === selectedProjectId;
-            return (
-              <li key={p.id}>
-                <button
-                  type="button"
-                  className={`flex w-full items-center gap-1.5 rounded px-1.5 py-1 text-left text-xs ${
-                    selected
-                      ? 'bg-shell-active text-gray-100'
-                      : 'text-gray-400 hover:bg-shell-hover hover:text-gray-200'
-                  }`}
-                  onClick={() => setSelectedProjectId(p.id)}
-                  title={p.description ?? undefined}
-                >
-                  <Briefcase
-                    className="h-3.5 w-3.5 shrink-0 opacity-80"
-                    strokeWidth={1.75}
-                  />
-                  <span className="truncate">{p.name}</span>
-                </button>
-              </li>
-            );
-          })
-        )}
-      </ul>
+    <div className="flex flex-col">
+      {projects.length === 0 && !showAddForm && (
+        <p className="px-3 py-2 text-xs text-gray-500">No projects yet.</p>
+      )}
 
-      {selectedProjectId ? (
-        <ExplorerTree projectId={selectedProjectId} />
-      ) : null}
+      {/* Each project is a VS Code-style collapsible section */}
+      {projects.map((p) => {
+        const isCollapsed = collapsed[p.id] ?? false;
+        return (
+          <div key={p.id}>
+            {/* Section header — sticky, bold, uppercase like VS Code */}
+            <button
+              type="button"
+              className="group flex w-full items-center gap-1 bg-shell-sidebar px-2 py-1 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-400 hover:text-gray-200 transition-colors sticky top-0 z-[5] border-b border-shell-border/50"
+              onClick={() => toggleProject(p.id)}
+              title={p.description ?? p.name}
+            >
+              <span className="shrink-0 text-gray-500">
+                {isCollapsed ? (
+                  <ChevronRight className="h-3.5 w-3.5" />
+                ) : (
+                  <ChevronDown className="h-3.5 w-3.5" />
+                )}
+              </span>
+              <span className="truncate">{p.name}</span>
+            </button>
 
-      <form onSubmit={handleAddProject} className="mt-2 space-y-1 border-t border-shell-border pt-2">
-        <input
-          className="w-full rounded border border-shell-border bg-shell-bg px-2 py-1 text-xs"
-          placeholder="New project name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          disabled={busy}
-          aria-label="New project name"
-        />
+            {/* Project contents */}
+            {!isCollapsed && (
+              <ExplorerTree projectId={p.id} />
+            )}
+          </div>
+        );
+      })}
+
+      {/* Inline add project form */}
+      {showAddForm && (
+        <form onSubmit={handleAddProject} className="px-2 py-1.5 space-y-1 border-t border-shell-border/50">
+          <input
+            className="w-full rounded border border-shell-border bg-shell-bg px-1.5 py-0.5 text-xs text-gray-200 placeholder-gray-600 focus:border-blue-500 focus:outline-none"
+            placeholder="Project name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            disabled={busy}
+            aria-label="New project name"
+            autoFocus
+          />
+          <div className="flex gap-1">
+            <button
+              type="submit"
+              disabled={busy}
+              className="flex-1 rounded bg-blue-600 px-2 py-0.5 text-xs font-medium text-white hover:bg-blue-500 disabled:opacity-50"
+            >
+              Create
+            </button>
+            <button
+              type="button"
+              className="rounded px-2 py-0.5 text-xs text-gray-400 hover:bg-shell-hover hover:text-gray-200"
+              onClick={() => { setShowAddForm(false); setError(null); }}
+            >
+              Cancel
+            </button>
+          </div>
+          {error && (
+            <p className="text-[10px] text-red-400" role="alert">{error}</p>
+          )}
+        </form>
+      )}
+
+      {/* Small + button to add project (when form is hidden) */}
+      {!showAddForm && (
         <button
-          type="submit"
-          disabled={busy}
-          className="w-full rounded border border-shell-border bg-shell-active px-2 py-1 text-xs hover:bg-shell-hover disabled:opacity-50"
+          type="button"
+          className="flex w-full items-center gap-1.5 px-2 py-1 text-xs text-gray-500 hover:bg-shell-hover hover:text-gray-300 transition-colors border-t border-shell-border/30"
+          onClick={() => setShowAddForm(true)}
         >
-          Add project
+          <Plus className="h-3 w-3" />
+          <span>New project</span>
         </button>
-      </form>
-      {error ? (
-        <p className="mt-1 text-xs text-red-400" role="alert">
-          {error}
-        </p>
-      ) : null}
+      )}
     </div>
   );
 }

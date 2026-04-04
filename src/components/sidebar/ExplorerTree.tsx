@@ -23,7 +23,7 @@ type MenuState =
   | {
       x: number;
       y: number;
-      items: { label: string; onClick: () => void; danger?: boolean }[];
+      items: { label: string; onClick: () => void; danger?: boolean; separator?: boolean }[];
     }
   | null;
 
@@ -36,6 +36,7 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
   const treeRevision = useProjectsStore((s) => s.treeRevision);
   const bumpTree = useProjectsStore((s) => s.bumpTree);
   const openOrFocusTab = useEditorStore((s) => s.openOrFocusTab);
+  const activeTabId = useEditorStore((s) => s.activeTabId);
 
   const [tree, setTree] = useState<ProjectTreeSnapshot | null>(null);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -167,7 +168,6 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
     const fileId = e.dataTransfer.getData(DRAG_TYPE_FILE);
 
     if (folderId) {
-      // Don't drop a folder into itself
       if (folderId === targetFolderId) return;
       try {
         await ipc(IPC.FOLDER_MOVE, {
@@ -200,15 +200,15 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
       y: e.clientY,
       items: [
         {
-          label: 'New folder',
-          onClick: () => void createFolder(null),
-        },
-        {
-          label: 'New OpenAPI file…',
+          label: 'New File…',
           onClick: () => setSpecDialog({ folderId: null }),
         },
         {
-          label: 'Import file…',
+          label: 'New Folder…',
+          onClick: () => void createFolder(null),
+        },
+        {
+          label: 'Import File…',
           onClick: () => setImportDialog({ folderId: null }),
         },
       ],
@@ -223,17 +223,18 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
       y: e.clientY,
       items: [
         {
-          label: 'New folder',
-          onClick: () => void createFolder(folder.id),
-        },
-        {
-          label: 'New OpenAPI file…',
+          label: 'New File…',
           onClick: () => setSpecDialog({ folderId: folder.id }),
         },
         {
-          label: 'Import file…',
+          label: 'New Folder…',
+          onClick: () => void createFolder(folder.id),
+        },
+        {
+          label: 'Import File…',
           onClick: () => setImportDialog({ folderId: folder.id }),
         },
+        { label: '', onClick: () => {}, separator: true },
         {
           label: 'Rename',
           onClick: () => void renameFolder(folder),
@@ -259,7 +260,7 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
           onClick: () => void openFile(file),
         },
         {
-          label: 'Export file…',
+          label: 'Export File…',
           onClick: async () => {
             try {
               const { content } = await ipc<{ content: string }>(
@@ -272,6 +273,7 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
             }
           },
         },
+        { label: '', onClick: () => {}, separator: true },
         {
           label: 'Rename',
           onClick: () => void renameFile(file),
@@ -286,11 +288,27 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
   }
 
   if (!tree) {
-    return <p className="px-2 py-1 text-xs text-gray-500">Loading tree…</p>;
+    return <p className="px-3 py-1 text-xs text-gray-500">Loading…</p>;
   }
 
   const rootFolders = tree.folders.filter((f) => !f.parentFolderId);
   const rootFiles = tree.files.filter((f) => !f.folderId);
+
+  /* ── Indent guide rendering helper ── */
+  function IndentGuides({ depth }: { depth: number }) {
+    if (depth === 0) return null;
+    return (
+      <>
+        {Array.from({ length: depth }, (_, i) => (
+          <span
+            key={i}
+            className="inline-block w-4 shrink-0 border-r border-shell-border/40"
+            style={{ marginLeft: i === 0 ? 4 : 0 }}
+          />
+        ))}
+      </>
+    );
+  }
 
   function renderFolder(folder: FolderRow, depth: number): ReactNode {
     const open = expanded[folder.id] ?? true;
@@ -301,10 +319,9 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
     return (
       <div key={folder.id} className="select-none">
         <div
-          className={`flex cursor-pointer items-center gap-0.5 rounded px-1 py-0.5 text-xs text-gray-300 hover:bg-shell-hover ${
+          className={`flex cursor-pointer items-center h-[22px] text-xs text-gray-300 hover:bg-shell-hover ${
             isDropTarget ? 'ring-1 ring-blue-500 bg-blue-500/10' : ''
           }`}
-          style={{ paddingLeft: 4 + depth * 12 }}
           draggable
           onDragStart={(e) => onDragStartFolder(e, folder)}
           onDragOver={(e) => onDragOver(e, folder.id)}
@@ -312,9 +329,9 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
           onDrop={(e) => void onDrop(e, folder.id)}
           onContextMenu={(e) => onFolderContext(e, folder)}
           onClick={() => toggleFolder(folder.id)}
-          onDoubleClick={() => toggleFolder(folder.id)}
         >
-          <span className="shrink-0 text-gray-500">
+          <IndentGuides depth={depth} />
+          <span className="shrink-0 text-gray-500 ml-0.5">
             {open ? (
               <ChevronDown className="h-3.5 w-3.5" />
             ) : (
@@ -322,38 +339,46 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
             )}
           </span>
           {open ? (
-            <FolderOpen className="h-3.5 w-3.5 shrink-0 text-amber-600/90" />
+            <FolderOpen className="h-3.5 w-3.5 shrink-0 text-amber-500/80 mr-1" />
           ) : (
-            <Folder className="h-3.5 w-3.5 shrink-0 text-amber-600/90" />
+            <Folder className="h-3.5 w-3.5 shrink-0 text-amber-500/80 mr-1" />
           )}
           <span className="truncate">{folder.name}</span>
         </div>
-        {open ? (
+        {open && (
           <div>
             {children.map((ch) => renderFolder(ch, depth + 1))}
-            {filesHere.map((file) => (
-              <button
-                key={file.id}
-                type="button"
-                className="flex w-full cursor-pointer items-center gap-1 rounded py-0.5 pl-6 pr-1 text-left text-xs text-gray-400 hover:bg-shell-hover hover:text-gray-200"
-                style={{ paddingLeft: 8 + (depth + 1) * 12 }}
-                draggable
-                onDragStart={(e) => onDragStartFile(e, file)}
-                onContextMenu={(e) => onFileContext(e, file)}
-                onClick={() => void openFile(file)}
-              >
-                <FileText className="h-3.5 w-3.5 shrink-0 text-blue-400/90" />
-                <span className="truncate">
-                  {file.name}
-                  {file.filePath.toLowerCase().endsWith('.json')
-                    ? '.json'
-                    : '.yaml'}
-                </span>
-              </button>
-            ))}
+            {filesHere.map((file) => renderFileNode(file, depth + 1))}
           </div>
-        ) : null}
+        )}
       </div>
+    );
+  }
+
+  function renderFileNode(file: SpecFileRow, depth: number): ReactNode {
+    const isActive = activeTabId === file.id;
+    return (
+      <button
+        key={file.id}
+        type="button"
+        className={`flex w-full cursor-pointer items-center h-[22px] text-left text-xs transition-colors ${
+          isActive
+            ? 'bg-blue-500/10 text-gray-100'
+            : 'text-gray-400 hover:bg-shell-hover hover:text-gray-200'
+        }`}
+        draggable
+        onDragStart={(e) => onDragStartFile(e, file)}
+        onContextMenu={(e) => onFileContext(e, file)}
+        onClick={() => void openFile(file)}
+      >
+        <IndentGuides depth={depth} />
+        <span className="w-4 shrink-0" /> {/* chevron spacer to align with folders */}
+        <FileText className={`h-3.5 w-3.5 shrink-0 mr-1 ${isActive ? 'text-blue-400' : 'text-blue-400/70'}`} />
+        <span className="truncate">
+          {file.name}
+          {file.filePath.toLowerCase().endsWith('.json') ? '.json' : '.yaml'}
+        </span>
+      </button>
     );
   }
 
@@ -361,7 +386,7 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
 
   return (
     <div
-      className={`border-t border-shell-border px-1 py-1 ${
+      className={`min-h-[24px] py-0.5 ${
         isRootDropTarget ? 'ring-1 ring-blue-500 bg-blue-500/10' : ''
       }`}
       onContextMenu={onProjectRootContext}
@@ -369,61 +394,45 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
       onDragLeave={onDragLeave}
       onDrop={(e) => void onDrop(e, null)}
     >
-      <div className="mb-1 px-1 text-[10px] font-semibold uppercase text-gray-500">
-        Files
-      </div>
       {rootFolders.map((f) => renderFolder(f, 0))}
-      {rootFiles.map((file) => (
-        <button
-          key={file.id}
-          type="button"
-          className="flex w-full cursor-pointer items-center gap-1 rounded px-1 py-0.5 text-left text-xs text-gray-400 hover:bg-shell-hover hover:text-gray-200"
-          style={{ paddingLeft: 8 }}
-          draggable
-          onDragStart={(e) => onDragStartFile(e, file)}
-          onContextMenu={(e) => onFileContext(e, file)}
-          onClick={() => void openFile(file)}
-        >
-          <FileText className="h-3.5 w-3.5 shrink-0 text-blue-400/90" />
-          <span className="truncate">
-            {file.name}
-            {file.filePath.toLowerCase().endsWith('.json') ? '.json' : '.yaml'}
-          </span>
-        </button>
-      ))}
-      {rootFolders.length === 0 && rootFiles.length === 0 ? (
-        <p className="px-1 text-xs text-gray-500">
-          Right-click here for new folder or spec file.
+      {rootFiles.map((file) => renderFileNode(file, 0))}
+      {rootFolders.length === 0 && rootFiles.length === 0 && (
+        <p className="px-3 py-1 text-[10px] text-gray-600 italic">
+          Right-click to add files
         </p>
-      ) : null}
+      )}
 
-      {menu ? (
+      {menu && (
         <div
-          className="fixed z-[100] min-w-[160px] rounded border border-shell-border bg-shell-sidebar py-0.5 shadow-lg"
+          className="fixed z-[100] min-w-[160px] rounded border border-shell-border bg-shell-sidebar py-0.5 shadow-xl"
           style={{ left: menu.x, top: menu.y }}
           onClick={(e) => e.stopPropagation()}
           role="menu"
         >
-          {menu.items.map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              role="menuitem"
-              className={`block w-full px-3 py-1.5 text-left text-xs hover:bg-shell-hover ${
-                item.danger ? 'text-red-400' : 'text-gray-200'
-              }`}
-              onClick={() => {
-                setMenu(null);
-                item.onClick();
-              }}
-            >
-              {item.label}
-            </button>
-          ))}
+          {menu.items.map((item, idx) =>
+            item.separator ? (
+              <div key={idx} className="my-0.5 h-px bg-shell-border/60 mx-2" />
+            ) : (
+              <button
+                key={item.label}
+                type="button"
+                role="menuitem"
+                className={`block w-full px-3 py-1 text-left text-xs hover:bg-shell-hover ${
+                  item.danger ? 'text-red-400' : 'text-gray-200'
+                }`}
+                onClick={() => {
+                  setMenu(null);
+                  item.onClick();
+                }}
+              >
+                {item.label}
+              </button>
+            ),
+          )}
         </div>
-      ) : null}
+      )}
 
-      {specDialog ? (
+      {specDialog && (
         <CreateSpecDialog
           projectId={projectId}
           folderId={specDialog.folderId}
@@ -433,9 +442,9 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
             bumpTree();
           }}
         />
-      ) : null}
+      )}
 
-      {importDialog ? (
+      {importDialog && (
         <ImportDialog
           projectId={projectId}
           folderId={importDialog.folderId}
@@ -445,16 +454,15 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
             bumpTree();
           }}
         />
-      ) : null}
+      )}
 
-      {exportDialog ? (
+      {exportDialog && (
         <ExportDialog
           content={exportDialog.content}
           fileName={exportDialog.fileName}
           onClose={() => setExportDialog(null)}
         />
-      ) : null}
-
+      )}
     </div>
   );
 }
