@@ -38,7 +38,7 @@ export function registerAllIpc(db: Database): void {
   registerFsIpc(handle, IPC);
   registerSpecIpc(handle, IPC);
   registerGitIpc(handle, IPC);
-  registerVersionIpc(handle, IPC);
+  registerVersionIpc(db, handle, IPC);
   registerValidationIpc(handle, IPC);
   registerImportExportIpc(handle, IPC);
   registerSettingsIpc(db, handle);

@@ -40,7 +40,9 @@ export const IPC = {
 
   VERSION_CREATE: 'version:create',
   VERSION_LIST: 'version:list',
+  VERSION_GET: 'version:get',
   VERSION_RESTORE: 'version:restore',
+  VERSION_DELETE: 'version:delete',
   VERSION_DIFF: 'version:diff',
 
   GIT_AUTH: 'git:auth',

@@ -128,3 +128,27 @@ export interface MoveSpecFileInput {
   specFileId: string;
   newFolderId: string | null;
 }
+
+/* ── Versioning ── */
+
+export interface SpecVersionRow {
+  id: string;
+  specFileId: string;
+  versionNumber: number;
+  versionLabel: string | null;
+  content: string;
+  contentHash: string;
+  changeSummary: string | null;
+  createdAt: number;
+  createdBy: string;
+}
+
+export interface CreateVersionInput {
+  specFileId: string;
+  label?: string;
+}
+
+export interface RestoreVersionInput {
+  versionId: string;
+  specFileId: string;
+}
