@@ -9,12 +9,18 @@ interface UiState {
   sidebarWidth: number;
   bottomPanelHeight: number;
   quickOpenOpen: boolean;
+  commandPaletteOpen: boolean;
+  settingsOpen: boolean;
+  templateLibraryOpen: boolean;
   setSidebarVisible: (v: boolean) => void;
   setBottomPanelVisible: (v: boolean) => void;
   setSidebarPanel: (p: SidebarPanel) => void;
   setSidebarWidth: (px: number) => void;
   setBottomPanelHeight: (px: number) => void;
   setQuickOpenOpen: (v: boolean) => void;
+  setCommandPaletteOpen: (v: boolean) => void;
+  setSettingsOpen: (v: boolean) => void;
+  setTemplateLibraryOpen: (v: boolean) => void;
 }
 
 export const useUiStore = create<UiState>((set) => ({
@@ -24,10 +30,16 @@ export const useUiStore = create<UiState>((set) => ({
   sidebarWidth: 260,
   bottomPanelHeight: 160,
   quickOpenOpen: false,
+  commandPaletteOpen: false,
+  settingsOpen: false,
+  templateLibraryOpen: false,
   setSidebarVisible: (sidebarVisible) => set({ sidebarVisible }),
   setBottomPanelVisible: (bottomPanelVisible) => set({ bottomPanelVisible }),
   setSidebarPanel: (sidebarPanel) => set({ sidebarPanel }),
   setSidebarWidth: (sidebarWidth) => set({ sidebarWidth: Math.max(180, Math.min(500, sidebarWidth)) }),
   setBottomPanelHeight: (bottomPanelHeight) => set({ bottomPanelHeight: Math.max(80, Math.min(500, bottomPanelHeight)) }),
   setQuickOpenOpen: (quickOpenOpen) => set({ quickOpenOpen }),
+  setCommandPaletteOpen: (commandPaletteOpen) => set({ commandPaletteOpen }),
+  setSettingsOpen: (settingsOpen) => set({ settingsOpen }),
+  setTemplateLibraryOpen: (templateLibraryOpen) => set({ templateLibraryOpen }),
 }));

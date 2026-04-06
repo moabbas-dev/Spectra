@@ -7,7 +7,6 @@ import { useIPC } from './hooks/useIPC';
 import { useRealtimeValidation } from './hooks/useValidation';
 import { useEditorStore } from './stores/editor.store';
 import { useProjectsStore } from './stores/projects.store';
-import { useUiStore } from './stores/ui.store';
 import { useWorkspaceStore } from './stores/workspace.store';
 
 const TABS_SETTINGS_KEY = 'editor.openTabs';
@@ -185,72 +184,8 @@ export function App() {
     return () => clearInterval(timer);
   }, [ipc]);
 
-  /* ── Autosave every 30 seconds ── */
-  useEffect(() => {
-    const AUTOSAVE_INTERVAL = 30_000;
-    const timer = setInterval(async () => {
-      const { tabs, markTabSaved } = useEditorStore.getState();
-      for (const tab of tabs) {
-        if (!tab.dirty) continue;
-        try {
-          await ipc(IPC.FS_WRITE_FILE, {
-            path: tab.filePath,
-            content: tab.content,
-          });
-          markTabSaved(tab.specFileId, tab.content);
-        } catch {
-          /* silently skip — file might be locked */
-        }
-      }
-    }, AUTOSAVE_INTERVAL);
-    return () => clearInterval(timer);
-  }, [ipc]);
-
-  /* ── Global keyboard shortcuts ── */
-  useEffect(() => {
-    async function saveActiveTab() {
-      const { activeTabId, tabs, markTabSaved } = useEditorStore.getState();
-      const tab = tabs.find((t) => t.specFileId === activeTabId);
-      if (!tab) return;
-      await ipc(IPC.FS_WRITE_FILE, {
-        path: tab.filePath,
-        content: tab.content,
-      });
-      markTabSaved(tab.specFileId, tab.content);
-      // Clear crash recovery after successful manual save
-      void ipc(IPC.SETTINGS_SET, CRASH_RECOVERY_KEY, '');
-    }
-
-    function onKeyDown(e: KeyboardEvent) {
-      const mod = e.ctrlKey || e.metaKey;
-      if (mod && e.key.toLowerCase() === 'b') {
-        e.preventDefault();
-        const { sidebarVisible, setSidebarVisible } = useUiStore.getState();
-        setSidebarVisible(!sidebarVisible);
-      }
-      if (mod && e.key.toLowerCase() === 'j') {
-        e.preventDefault();
-        const { bottomPanelVisible, setBottomPanelVisible } =
-          useUiStore.getState();
-        setBottomPanelVisible(!bottomPanelVisible);
-      }
-      if (mod && e.key.toLowerCase() === 'p') {
-        e.preventDefault();
-        useUiStore.getState().setQuickOpenOpen(true);
-      }
-      if (mod && e.key.toLowerCase() === 'w') {
-        e.preventDefault();
-        const { activeTabId, closeTab } = useEditorStore.getState();
-        if (activeTabId) closeTab(activeTabId);
-      }
-      if (mod && e.key.toLowerCase() === 's') {
-        e.preventDefault();
-        void saveActiveTab();
-      }
-    }
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [ipc]);
+  /* Autosave + keyboard shortcuts are handled by useAutosave() and
+     useKeyboardShortcuts() hooks mounted in AppShell. */
 
   /* ── Crash recovery handlers ── */
   function handleRestoreAll(entries: CrashRecoveryEntry[]) {

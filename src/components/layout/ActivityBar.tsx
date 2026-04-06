@@ -61,6 +61,7 @@ export function ActivityBar() {
         title="Settings"
         aria-label="Settings"
         className="flex h-10 w-10 items-center justify-center rounded text-gray-400 hover:bg-shell-hover hover:text-gray-200"
+        onClick={() => useUiStore.getState().setSettingsOpen(true)}
       >
         <Settings className="h-5 w-5" strokeWidth={1.75} aria-hidden />
       </button>

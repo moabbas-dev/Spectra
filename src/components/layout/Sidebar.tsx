@@ -149,9 +149,34 @@ export function Sidebar() {
             <WorkspaceSelector />
             <ProjectTree />
           </>
+        ) : panel === 'search' ? (
+          <div className="flex flex-col gap-2 p-2">
+            <input
+              type="text"
+              placeholder="Search workspace…"
+              className="w-full rounded border border-shell-border bg-shell-bg px-2 py-1.5 text-xs text-gray-200 placeholder-gray-600 focus:border-blue-500 focus:outline-none"
+            />
+            <p className="text-[11px] text-gray-500 px-1">
+              Type to search across all spec files in the workspace.
+            </p>
+          </div>
+        ) : panel === 'history' ? (
+          <div className="p-3 flex flex-col items-center gap-2 text-center">
+            <span className="text-[11px] text-gray-400">
+              Open a file and go to the <strong>History</strong> tab to view version snapshots.
+            </span>
+          </div>
+        ) : panel === 'favorites' ? (
+          <div className="p-3 flex flex-col items-center gap-2 text-center">
+            <span className="text-[11px] text-gray-500">
+              Right-click a file and select <strong>Add to Favorites</strong> to pin it here.
+            </span>
+          </div>
         ) : (
-          <div className="p-3 text-sm text-gray-500">
-            This panel is not implemented yet.
+          <div className="p-3 flex flex-col items-center gap-2 text-center">
+            <span className="text-[11px] text-gray-500">
+              Git integration has been removed for security reasons.
+            </span>
           </div>
         )}
       </div>

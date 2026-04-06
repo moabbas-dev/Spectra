@@ -1,12 +1,17 @@
 import { useCallback, useRef } from 'react';
 import { PanelBottomClose, PanelBottomOpen } from 'lucide-react';
 import { QuickOpenModal } from '../dialogs/QuickOpenModal';
+import { CommandPalette } from '../dialogs/CommandPalette';
+import { SettingsDialog } from '../dialogs/SettingsDialog';
+import { TemplateLibrary } from '../templates/TemplateLibrary';
 import { ActivityBar } from './ActivityBar';
 import { BottomPanel } from './BottomPanel';
 import { MainArea } from './MainArea';
 import { Sidebar } from './Sidebar';
 import { StatusBar } from './StatusBar';
 import { useUiStore } from '../../stores/ui.store';
+import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
+import { useAutosave } from '../../hooks/useAutosave';
 
 export function AppShell() {
   const sidebarVisible = useUiStore((s) => s.sidebarVisible);
@@ -15,6 +20,10 @@ export function AppShell() {
   const setBottomPanelHeight = useUiStore((s) => s.setBottomPanelHeight);
   const setSidebarWidth = useUiStore((s) => s.setSidebarWidth);
   const setBottomPanelVisible = useUiStore((s) => s.setBottomPanelVisible);
+
+  /* Mount global hooks */
+  useKeyboardShortcuts();
+  useAutosave();
 
   /* ── Sidebar drag-to-resize ── */
   const sidebarDragging = useRef(false);
@@ -147,6 +156,10 @@ export function AppShell() {
 
       <StatusBar />
       <QuickOpenModal />
+      <CommandPalette />
+      <SettingsDialog />
+      <TemplateLibrary />
     </div>
   );
 }
+
