@@ -56,7 +56,8 @@
     "appId": "com.mohamad.spectra",
     "productName": "Spectra",
     "directories": {
-      "output": "release"
+      "output": "release",
+      "buildResources": "build"
     },
     "files": [
       "dist/**",

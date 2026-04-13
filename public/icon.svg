@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="beam" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="1" />
+    </linearGradient>
+    <linearGradient id="prism" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#a8b1ff" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#4a55d1" stop-opacity="0.9" />
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="512" height="512" rx="100" fill="#1e1e1e" />
+  <!-- White Light Beam -->
+  <polygon points="50,300 200,250 200,260 50,310" fill="url(#beam)" />
+  <!-- Prism -->
+  <polygon points="256,120 156,380 356,380" fill="url(#prism)" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" />
+  <!-- Spectra Beams -->
+  <polygon points="300,230 460,180 460,190 300,240" fill="#ff4c4c" />
+  <polygon points="310,250 460,220 460,230 310,260" fill="#ffa64c" />
+  <polygon points="320,270 460,260 460,270 320,280" fill="#ffef4c" />
+  <polygon points="330,290 460,300 460,310 330,300" fill="#4cff4c" />
+  <polygon points="320,310 460,340 460,350 320,320" fill="#4c8cff" />
+  <polygon points="310,330 460,380 460,390 310,340" fill="#a64cff" />
+</svg>

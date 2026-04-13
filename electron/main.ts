@@ -4,6 +4,10 @@ import { registerAllIpc } from './ipc/index';
 import { closeDatabase, getDatabase } from './services/database.service';
 import { logger } from './utils/logger.util';
 
+process.on("uncaughtException", (err) => {
+  console.error("UNCAUGHT:", err);
+});
+
 process.env.NODE_ENV ??= app.isPackaged ? 'production' : 'development';
 
 const isDev = Boolean(process.env.VITE_DEV_SERVER_URL);
@@ -15,6 +19,7 @@ export function createMainWindow(): BrowserWindow {
     minWidth: 800,
     minHeight: 600,
     title: 'Spectra',
+    icon: path.join(__dirname, '..', '..', isDev ? 'public' : 'dist', 'icon.svg'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -33,8 +38,8 @@ export function createMainWindow(): BrowserWindow {
     // Docked devtools avoid spurious "Failed to fetch" noise from detached Elements panel.
     win.webContents.openDevTools({ mode: 'bottom' });
   } else {
-    const htmlPath = path.join(__dirname, '..', '..', 'dist', 'index.html');
-    void win.loadFile(htmlPath);
+    const indexPath = path.join(app.getAppPath(), "dist", "index.html");
+    void win.loadFile(indexPath);
   }
 
   return win;
