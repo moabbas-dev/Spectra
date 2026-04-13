@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { PathItemObject, OperationObject, HttpMethod } from '../../../types/openapi.types';
 import { HTTP_METHODS } from '../../../types/openapi.types';
 import { OperationForm } from './OperationForm';
 import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ExtensionsList } from '../ExtensionsList';
 
 interface Props {
   path: string;
@@ -24,6 +25,17 @@ const METHOD_COLORS: Record<string, string> = {
 
 export function PathItem({ path, pathItem, onChange, onChangePath }: Props) {
   const [expanded, setExpanded] = useState(true);
+  const [localPath, setLocalPath] = useState(path);
+
+  useEffect(() => {
+    setLocalPath(path);
+  }, [path]);
+
+  function commitPath() {
+    if (localPath.trim() !== path) {
+      onChangePath(localPath.trim());
+    }
+  }
 
   const activeMethods = HTTP_METHODS.filter(
     (m) => pathItem[m] !== undefined,
@@ -66,8 +78,12 @@ export function PathItem({ path, pathItem, onChange, onChangePath }: Props) {
         </button>
         <input
           className="flex-1 border-0 bg-transparent text-xs font-mono text-gray-200 outline-none placeholder:text-gray-600"
-          value={path}
-          onChange={(e) => onChangePath(e.target.value)}
+          value={localPath}
+          onChange={(e) => setLocalPath(e.target.value)}
+          onBlur={commitPath}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') commitPath();
+          }}
           placeholder="/users/{id}"
         />
         <div className="flex gap-1">
@@ -114,6 +130,18 @@ export function PathItem({ path, pathItem, onChange, onChangePath }: Props) {
               onChange={(op) => updateOperation(method, op)}
             />
           ))}
+
+          <ExtensionsList
+            parentObj={pathItem as any}
+            onChange={(key, value) => {
+              onChange({ ...pathItem, [key]: value });
+            }}
+            onRemove={(key) => {
+              const next = { ...pathItem };
+              delete next[key as keyof PathItemObject];
+              onChange(next);
+            }}
+          />
         </div>
       )}
     </div>

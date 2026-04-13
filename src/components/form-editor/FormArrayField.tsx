@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import { ConfirmDeleteButton } from '../ui/ConfirmDeleteButton';
 
 interface Props<T> {
   items: T[];
@@ -28,14 +29,11 @@ export function FormArrayField<T>({
           key={i}
           className="group relative rounded border border-shell-border bg-[#2a2a2a] p-3"
         >
-          <button
-            type="button"
-            className="absolute right-2 top-2 rounded p-1 text-gray-600 opacity-0 transition-opacity hover:bg-red-900/30 hover:text-red-400 group-hover:opacity-100"
-            aria-label="Remove item"
-            onClick={() => onRemove(i)}
-          >
-            <Trash2 className="h-3 w-3" />
-          </button>
+          <ConfirmDeleteButton
+            onConfirm={() => onRemove(i)}
+            className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100"
+            title="Remove item"
+          />
           {renderItem(item, i)}
         </div>
       ))}

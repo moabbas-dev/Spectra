@@ -63,7 +63,7 @@ export function registerTreeIpc(db: Database, handle: HandleFn): void {
     }
 
     const absPath = path.join(root, relPath);
-    await fs.mkdir(absPath, { recursive: false });
+    await fs.mkdir(absPath, { recursive: true });
 
     return folderRepo.insertFolder(db, {
       projectId: input.projectId,

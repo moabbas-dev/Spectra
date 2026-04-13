@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import { registerAllIpc } from './ipc/index';
 import { closeDatabase, getDatabase } from './services/database.service';
 import { logger } from './utils/logger.util';
@@ -8,7 +8,7 @@ process.env.NODE_ENV ??= app.isPackaged ? 'production' : 'development';
 
 const isDev = Boolean(process.env.VITE_DEV_SERVER_URL);
 
-function createMainWindow(): BrowserWindow {
+export function createMainWindow(): BrowserWindow {
   const win = new BrowserWindow({
     width: 1280,
     height: 800,
@@ -44,6 +44,11 @@ app.whenReady().then(() => {
   try {
     const db = getDatabase();
     registerAllIpc(db);
+    
+    ipcMain.handle('window:open', () => {
+      createMainWindow();
+      return true;
+    });
   } catch (err) {
     logger.error('Failed to initialize database or IPC', err);
     app.quit();

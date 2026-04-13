@@ -2,6 +2,7 @@ import type { PathItemObject } from '../../../types/openapi.types';
 import { FormSection } from '../FormSection';
 import { PathItem } from './PathItem';
 import { Route, Plus } from 'lucide-react';
+import { ConfirmDeleteButton } from '../../ui/ConfirmDeleteButton';
 
 interface Props {
   paths: Record<string, PathItemObject>;
@@ -51,14 +52,12 @@ export function PathsSection({ paths, onChange }: Props) {
         )}
         {entries.map(([path, item]) => (
           <div key={path} className="group relative">
-            <button
-              type="button"
-              className="absolute -right-1 -top-1 z-10 rounded bg-red-900/50 p-0.5 text-red-400 opacity-0 transition-opacity hover:bg-red-900 group-hover:opacity-100"
-              aria-label={`Remove ${path}`}
-              onClick={() => removePath(path)}
-            >
-              ×
-            </button>
+            <div className="absolute -right-3 -top-2 z-10 opacity-0 transition-opacity group-hover:opacity-100 bg-[#2a2a2a] shadow rounded border border-shell-border">
+              <ConfirmDeleteButton
+                onConfirm={() => removePath(path)}
+                title={`Remove ${path}`}
+              />
+            </div>
             <PathItem
               path={path}
               pathItem={item}

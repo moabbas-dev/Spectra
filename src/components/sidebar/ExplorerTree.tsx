@@ -34,6 +34,7 @@ const DRAG_TYPE_FILE = 'spectra/file-id';
 export function ExplorerTree({ projectId }: ExplorerTreeProps) {
   const ipc = useIPC();
   const treeRevision = useProjectsStore((s) => s.treeRevision);
+  const collapseRevision = useProjectsStore((s) => s.collapseRevision);
   const bumpTree = useProjectsStore((s) => s.bumpTree);
   const openOrFocusTab = useEditorStore((s) => s.openOrFocusTab);
   const activeTabId = useEditorStore((s) => s.activeTabId);
@@ -63,6 +64,12 @@ export function ExplorerTree({ projectId }: ExplorerTreeProps) {
   useEffect(() => {
     void loadTree();
   }, [loadTree, treeRevision]);
+
+  useEffect(() => {
+    if (collapseRevision > 0) {
+      setExpanded({});
+    }
+  }, [collapseRevision]);
 
   useEffect(() => {
     function close() {

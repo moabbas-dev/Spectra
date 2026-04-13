@@ -1,5 +1,5 @@
 import { useCallback, useState, type FormEvent } from 'react';
-import { FolderOpen, Plus, Trash, X } from 'lucide-react';
+import { FolderOpen, Plus, Trash, X, ExternalLink } from 'lucide-react';
 import { IPC } from '@shared/ipc-channels';
 import type { ProjectRow, WorkspaceRow } from '@shared/ipc-payloads';
 import { useIPC } from '../../hooks/useIPC';
@@ -147,6 +147,15 @@ export function WorkspaceSelector() {
           ) : (
             <Plus className="h-3.5 w-3.5" />
           )}
+        </button>
+        <button
+          type="button"
+          className="shrink-0 rounded p-0.5 text-gray-500 hover:text-blue-400 transition-colors"
+          onClick={() => void ipc(IPC.WINDOW_OPEN)}
+          title="Open in new window"
+          aria-label="Open in new window"
+        >
+          <ExternalLink className="h-3 w-3" />
         </button>
         {activeWorkspaceId && (
           <button

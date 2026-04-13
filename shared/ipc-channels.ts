@@ -66,6 +66,8 @@ export const IPC = {
   WORKSPACE_IMPORT: 'workspace:import',
   APP_DATA_EXPORT: 'app-data:export',
   APP_DATA_IMPORT: 'app-data:import',
+  // Window
+  WINDOW_OPEN: 'window:open',
 } as const;
 
 export type IpcChannel = (typeof IPC)[keyof typeof IPC];

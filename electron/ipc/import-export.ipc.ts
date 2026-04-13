@@ -153,4 +153,49 @@ export function registerImportExportIpc(
 
     return { success: true, exportPath: exportDir, fileCount: files.length };
   });
+
+  const WORKSPACE_EXPORT = IPC.WORKSPACE_EXPORT ?? 'workspace:export';
+  const WORKSPACE_IMPORT = IPC.WORKSPACE_IMPORT ?? 'workspace:import';
+  const APP_DATA_EXPORT = IPC.APP_DATA_EXPORT ?? 'app-data:export';
+  const APP_DATA_IMPORT = IPC.APP_DATA_IMPORT ?? 'app-data:import';
+
+  handle(WORKSPACE_EXPORT, async (e, _workspaceId: unknown) => {
+    const win = BrowserWindow.fromWebContents(e.sender);
+    dialog.showMessageBox(win!, {
+      type: 'info',
+      title: 'Workspace Export',
+      message: 'Workspace Export logic is initialized but backend implementation is pending. Use manual project zip export for now.',
+    });
+    return null;
+  });
+
+  handle(WORKSPACE_IMPORT, async (e) => {
+    const win = BrowserWindow.fromWebContents(e.sender);
+    dialog.showMessageBox(win!, {
+      type: 'info',
+      title: 'Workspace Import',
+      message: 'Workspace Import logic is pending. Create a workspace manually and import individual files.',
+    });
+    return null;
+  });
+
+  handle(APP_DATA_EXPORT, async (e) => {
+    const win = BrowserWindow.fromWebContents(e.sender);
+    dialog.showMessageBox(win!, {
+      type: 'info',
+      title: 'App Data Export',
+      message: 'App Data Export will bundle the SQLite database and all workspace root directories. Feature incoming.',
+    });
+    return null;
+  });
+
+  handle(APP_DATA_IMPORT, async (e) => {
+    const win = BrowserWindow.fromWebContents(e.sender);
+    dialog.showMessageBox(win!, {
+      type: 'info',
+      title: 'App Data Import',
+      message: 'App Data Import will restore the database and files. This feature is incoming.',
+    });
+    return null;
+  });
 }

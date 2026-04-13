@@ -1,10 +1,11 @@
 import type { IpcMainInvokeEvent } from 'electron';
 import type { Database } from 'better-sqlite3';
 import fs from 'node:fs/promises';
-import path from 'node:path';
+   
 import type { CreateProjectInput } from '../../shared/ipc-payloads';
 import * as projectRepo from '../db/repositories/project.repo';
 import * as workspaceRepo from '../db/repositories/workspace.repo';
+import { getProjectRootAbsolute } from '../services/project-path.service';
 
 export function registerProjectIpc(
   db: Database,
@@ -24,7 +25,7 @@ export function registerProjectIpc(
       throw new Error('Workspace not found');
     }
     const project = projectRepo.createProject(db, input);
-    const root = path.join(ws.rootPath, project.id);
+    const root = getProjectRootAbsolute(db, project.id);
     await fs.mkdir(root, { recursive: true });
     return project;
   });
@@ -37,12 +38,11 @@ export function registerProjectIpc(
     const pid = id as string;
     const project = projectRepo.getProjectById(db, pid);
     if (project) {
-      const ws = workspaceRepo.getWorkspaceById(db, project.workspaceId);
-      if (ws) {
-        const root = path.join(ws.rootPath, pid);
-        await fs.rm(root, { recursive: true, force: true }).catch(() => {
-          /* disk may already be gone */
-        });
+      try {
+        const root = getProjectRootAbsolute(db, pid);
+        await fs.rm(root, { recursive: true, force: true });
+      } catch (e) {
+        /* ignore missing workspace/folder issues so we can still clean DB */
       }
     }
     projectRepo.deleteProject(db, pid);

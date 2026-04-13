@@ -2,7 +2,8 @@ import { useState } from 'react';
 import type { SchemaObject } from '../../../types/openapi.types';
 import { SchemaFieldBuilder } from '../fields/SchemaFieldBuilder';
 import { inputClass } from '../FormField';
-import { Plus, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
+import { Plus, ChevronDown, ChevronRight } from 'lucide-react';
+import { ConfirmDeleteButton } from '../../ui/ConfirmDeleteButton';
 
 interface Props {
   schemas: Record<string, SchemaObject>;
@@ -78,14 +79,11 @@ export function SchemasForm({ schemas, onChange, schemaNames }: Props) {
               </button>
               <span className="text-xs font-semibold text-blue-400">{name}</span>
               <span className="text-[10px] text-gray-600">{schema.type ?? '$ref'}</span>
-              <button
-                type="button"
-                className="ml-auto rounded p-1 text-gray-600 hover:bg-red-900/30 hover:text-red-400 transition-colors"
-                onClick={() => removeSchema(name)}
-                aria-label={`Remove schema ${name}`}
-              >
-                <Trash2 className="h-3 w-3" />
-              </button>
+              <ConfirmDeleteButton
+                onConfirm={() => removeSchema(name)}
+                className="ml-auto"
+                title={`Remove schema ${name}`}
+              />
             </div>
 
             {/* Schema body */}

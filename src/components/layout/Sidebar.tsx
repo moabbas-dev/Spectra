@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import {
-  FileUp,
-  Download,
   FilePlus,
   FolderPlus,
   ChevronsDownUp,
 } from 'lucide-react';
 import { WorkspaceSelector } from '../sidebar/WorkspaceSelector';
 import { ProjectTree } from '../sidebar/ProjectTree';
+import { ImportExportMenu } from '../sidebar/ImportExportMenu';
 import { useUiStore } from '../../stores/ui.store';
+import { useWorkspaceStore } from '../../stores/workspace.store';
 import { useEditorStore } from '../../stores/editor.store';
 import { useProjectsStore } from '../../stores/projects.store';
 import { useIPC } from '../../hooks/useIPC';
@@ -25,6 +25,7 @@ export function Sidebar() {
   const tabs = useEditorStore((s) => s.tabs);
   const projects = useProjectsStore((s) => s.projects);
   const bumpTree = useProjectsStore((s) => s.bumpTree);
+  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
 
   const [importDialog, setImportDialog] = useState<{ projectId: string; folderId: string | null } | null>(null);
   const [exportDialog, setExportDialog] = useState<{ content: string; fileName: string } | null>(null);
@@ -82,24 +83,12 @@ export function Sidebar() {
       },
       disabled: !firstProjectId,
     },
-    {
-      icon: FileUp,
-      label: 'Import File',
-      onClick: handleImportClick,
-      disabled: !firstProjectId,
-    },
-    {
-      icon: Download,
-      label: 'Export File',
-      onClick: () => void handleExportClick(),
-      disabled: !activeTab,
-    },
+    // Import and Export are now handled by the ImportExportMenu component
     {
       icon: ChevronsDownUp,
       label: 'Collapse All',
       onClick: () => {
-        /* collapse all is handled by bumping tree which re-renders */
-        bumpTree();
+        useProjectsStore.getState().triggerCollapse();
       },
       disabled: false,
     },
@@ -138,6 +127,13 @@ export function Sidebar() {
                 </button>
               );
             })}
+            
+            <ImportExportMenu 
+              onImportFile={handleImportClick} 
+              onExportFile={() => void handleExportClick()} 
+              activeWorkspaceId={activeWorkspaceId} 
+              hasActiveTab={!!activeTab} 
+            />
           </div>
         )}
       </div>

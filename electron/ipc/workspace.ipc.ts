@@ -1,8 +1,10 @@
 import type { IpcMainInvokeEvent } from 'electron';
 import type { Database } from 'better-sqlite3';
 import fs from 'node:fs/promises';
+import path from 'node:path';
 import type { CreateWorkspaceInput } from '../../shared/ipc-payloads';
 import * as workspaceRepo from '../db/repositories/workspace.repo';
+import { sanitizePathSegment } from '../utils/sanitize.util';
 
 const ACTIVE_KEY = 'active_workspace_id';
 
@@ -38,6 +40,8 @@ export function registerWorkspaceIpc(
 ): void {
   handle(IPC.WORKSPACE_CREATE, async (_e, payload: unknown) => {
     const input = payload as CreateWorkspaceInput;
+    const folderName = sanitizePathSegment(input.name);
+    input.rootPath = path.join(input.rootPath, folderName);
     await fs.mkdir(input.rootPath, { recursive: true });
     return workspaceRepo.createWorkspace(db, input);
   });

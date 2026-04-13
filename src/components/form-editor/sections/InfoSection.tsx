@@ -1,6 +1,7 @@
 import type { InfoObject, ContactObject, LicenseObject } from '../../../types/openapi.types';
 import { FormSection } from '../FormSection';
 import { FormField, inputClass, textareaClass } from '../FormField';
+import { ExtensionsList } from '../ExtensionsList';
 import { Info } from 'lucide-react';
 
 interface Props {
@@ -122,6 +123,18 @@ export function InfoSection({ info, onChange }: Props) {
           />
         </FormField>
       </div>
+
+      <ExtensionsList
+        parentObj={info as any}
+        onChange={(key, value) => {
+          onChange({ ...info, [key]: value });
+        }}
+        onRemove={(key) => {
+          const next = { ...info };
+          delete next[key as keyof InfoObject];
+          onChange(next);
+        }}
+      />
     </FormSection>
   );
 }
