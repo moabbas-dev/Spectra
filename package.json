@@ -12,7 +12,7 @@
     "build:electron": "node node_modules/typescript/bin/tsc -p tsconfig.electron.json && node -e \"require('fs').cpSync('electron/db/migrations', 'dist-electron/electron/db/migrations', {recursive:true, force:true})\"",
     "build:electron:watch": "node node_modules/typescript/bin/tsc -p tsconfig.electron.json --watch",
     "build": "npm run build:electron && node node_modules/vite/bin/vite.js build",
-    "dist": "npm run build && npx --yes electron-builder",
+    "dist": "npm run build && electron-builder",
     "preview": "node node_modules/vite/bin/vite.js preview",
     "typecheck": "node node_modules/typescript/bin/tsc --noEmit && node node_modules/typescript/bin/tsc -p tsconfig.electron.json --noEmit",
     "rebuild:native": "npx --yes @electron/rebuild"
@@ -41,6 +41,7 @@
     "concurrently": "^9.1.0",
     "cross-env": "^7.0.3",
     "electron": "^28.3.3",
+    "electron-builder": "^26.8.1",
     "lucide-react": "^0.468.0",
     "postcss": "^8.4.49",
     "react": "^18.3.1",
@@ -50,5 +51,22 @@
     "vite": "^6.0.3",
     "wait-on": "^8.0.1",
     "zustand": "^5.0.2"
+  },
+  "build": {
+    "appId": "com.mohamad.spectra",
+    "productName": "Spectra",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**",
+      "dist-electron/**"
+    ],
+    "win": {
+      "target": [
+        "portable"
+      ]
+    },
+    "npmRebuild": false
   }
 }
