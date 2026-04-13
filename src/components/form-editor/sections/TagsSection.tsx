@@ -23,7 +23,7 @@ export function TagsSection({ tags, onChange }: Props) {
   return (
     <FormSection
       title="Tags"
-      icon={<Tag className="h-3.5 w-3.5 text-green-400" />}
+      icon={<Tag className="h-3.5 w-3.5 text-green-500" />}
       defaultOpen={false}
     >
       <FormArrayField

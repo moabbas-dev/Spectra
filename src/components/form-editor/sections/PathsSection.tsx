@@ -43,7 +43,7 @@ export function PathsSection({ paths, onChange }: Props) {
   return (
     <FormSection
       title="Paths"
-      icon={<Route className="h-3.5 w-3.5" />}
+      icon={<Route className="h-3.5 w-3.5 text-lime-500 " />}
     >
       <div className="space-y-2">
         {entries.length === 0 && (

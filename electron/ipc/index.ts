@@ -1,4 +1,4 @@
-import { ipcMain, type IpcMainInvokeEvent } from 'electron';
+import { ipcMain, dialog, BrowserWindow, type IpcMainInvokeEvent } from 'electron';
 import type { Database } from 'better-sqlite3';
 import { IPC } from '../../shared/ipc-channels';
 import { logger } from '../utils/logger.util';
@@ -40,6 +40,17 @@ export function registerAllIpc(db: Database): void {
   registerGitIpc(handle, IPC);
   registerVersionIpc(db, handle, IPC);
   registerValidationIpc(handle, IPC);
-  registerImportExportIpc(handle, IPC);
+  registerImportExportIpc(db, handle, IPC);
   registerSettingsIpc(db, handle);
+
+  /* ── Simple dialog handlers ── */
+  handle(IPC.DIALOG_CHOOSE_FOLDER, async (e) => {
+    const win = BrowserWindow.fromWebContents(e.sender);
+    const result = await dialog.showOpenDialog(win!, {
+      title: 'Choose Folder',
+      properties: ['openDirectory', 'createDirectory'],
+    });
+    if (result.canceled || result.filePaths.length === 0) return null;
+    return result.filePaths[0];
+  });
 }

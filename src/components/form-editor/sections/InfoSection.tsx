@@ -23,7 +23,7 @@ export function InfoSection({ info, onChange }: Props) {
   }
 
   return (
-    <FormSection title="Info" icon={<Info className="h-3.5 w-3.5" />}>
+    <FormSection title="Info" icon={<Info className="h-3.5 w-3.5 text-blue-500" />}>
       <div className="grid grid-cols-2 gap-3">
         <FormField label="Title" htmlFor="info-title">
           <input

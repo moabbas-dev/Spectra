@@ -1,4 +1,5 @@
 import type { IpcMainInvokeEvent } from 'electron';
+import type { Database } from 'better-sqlite3';
 import { dialog, BrowserWindow } from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -26,6 +27,7 @@ function detectFormat(content: string): 'yaml' | 'json' {
 }
 
 export function registerImportExportIpc(
+  db: Database,
   handle: (
     channel: string,
     listener: (
@@ -38,7 +40,7 @@ export function registerImportExportIpc(
   const SPEC_IMPORT = IPC.SPEC_IMPORT ?? 'spec:import';
   const SPEC_EXPORT = IPC.SPEC_EXPORT ?? 'spec:export';
   const PROJECT_EXPORT_ZIP = IPC.PROJECT_EXPORT_ZIP ?? 'project:export-zip';
-
+  db; // this is temporary to disable the error
   /**
    * SPEC_IMPORT — Open file dialog, read YAML/JSON, detect version.
    * Returns ImportResult or null if cancelled.

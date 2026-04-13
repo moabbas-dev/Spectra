@@ -21,6 +21,8 @@ export const IPC = {
   SPEC_FILE_DELETE: 'spec-file:delete',
   SPEC_FILE_RENAME: 'spec-file:rename',
   SPEC_FILE_MOVE: 'spec-file:move',
+  SPEC_TOGGLE_FAVORITE: 'spec-file:toggle-favorite',
+  SPEC_LIST_FAVORITES: 'spec-file:list-favorites',
 
   QUICK_OPEN_LIST: 'quick-open:list',
 
@@ -57,6 +59,13 @@ export const IPC = {
 
   SETTINGS_GET: 'settings:get',
   SETTINGS_SET: 'settings:set',
+
+  DIALOG_CHOOSE_FOLDER: 'dialog:choose-folder',
+
+  WORKSPACE_EXPORT: 'workspace:export',
+  WORKSPACE_IMPORT: 'workspace:import',
+  APP_DATA_EXPORT: 'app-data:export',
+  APP_DATA_IMPORT: 'app-data:import',
 } as const;
 
 export type IpcChannel = (typeof IPC)[keyof typeof IPC];

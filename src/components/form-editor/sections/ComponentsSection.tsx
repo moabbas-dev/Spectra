@@ -34,7 +34,7 @@ export function ComponentsSection({ components, onChange }: Props) {
   return (
     <FormSection
       title="Components"
-      icon={<Layers className="h-3.5 w-3.5 text-purple-400" />}
+      icon={<Layers className="h-3.5 w-3.5 text-purple-500" />}
       defaultOpen={false}
     >
       {/* Schemas */}

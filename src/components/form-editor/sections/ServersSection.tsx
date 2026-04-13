@@ -18,7 +18,7 @@ export function ServersSection({ servers, onChange }: Props) {
   return (
     <FormSection
       title="Servers"
-      icon={<Server className="h-3.5 w-3.5" />}
+      icon={<Server className="h-3.5 w-3.5 text-orange-500" />}
     >
       <FormArrayField
         items={servers}

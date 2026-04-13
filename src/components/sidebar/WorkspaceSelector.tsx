@@ -1,5 +1,5 @@
 import { useCallback, useState, type FormEvent } from 'react';
-import { Plus, X } from 'lucide-react';
+import { FolderOpen, Plus, Trash, X } from 'lucide-react';
 import { IPC } from '@shared/ipc-channels';
 import type { ProjectRow, WorkspaceRow } from '@shared/ipc-payloads';
 import { useIPC } from '../../hooks/useIPC';
@@ -47,6 +47,15 @@ export function WorkspaceSelector() {
     },
     [ipc, setActiveWorkspaceId, setSelectedProjectId, loadProjectsForWorkspace],
   );
+
+  async function handleBrowse() {
+    try {
+      const folder = await ipc<string | null>(IPC.DIALOG_CHOOSE_FOLDER);
+      if (folder) setRootPath(folder);
+    } catch (err) {
+      console.error('Folder picker failed:', err);
+    }
+  }
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
@@ -148,7 +157,7 @@ export function WorkspaceSelector() {
             title="Delete active workspace"
             aria-label="Delete active workspace"
           >
-            <X className="h-3 w-3" />
+            <Trash className="h-3 w-3" />
           </button>
         )}
       </div>
@@ -165,14 +174,26 @@ export function WorkspaceSelector() {
             aria-label="New workspace name"
             autoFocus
           />
-          <input
-            className="w-full rounded border border-shell-border bg-shell-bg px-1.5 py-0.5 text-xs text-gray-200 placeholder-gray-600 focus:border-blue-500 focus:outline-none"
-            placeholder="Folder path (absolute)"
-            value={rootPath}
-            onChange={(e) => setRootPath(e.target.value)}
-            disabled={busy}
-            aria-label="Workspace root folder path"
-          />
+          <div className="flex items-center gap-1">
+            <div
+              className="min-w-0 flex-1 rounded border border-shell-border bg-shell-bg px-1.5 py-0.5 text-xs truncate"
+              title={rootPath || 'No folder selected'}
+            >
+              <span className={rootPath ? 'text-gray-200' : 'text-gray-600'}>
+                {rootPath || 'Select folder…'}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => void handleBrowse()}
+              disabled={busy}
+              className="shrink-0 flex items-center gap-1 rounded border border-shell-border bg-shell-bg px-1.5 py-0.5 text-xs text-gray-400 hover:bg-shell-hover hover:text-gray-200 transition-colors disabled:opacity-50"
+              title="Browse for folder"
+            >
+              <FolderOpen className="h-3 w-3" />
+              Browse
+            </button>
+          </div>
           <button
             type="submit"
             disabled={busy}

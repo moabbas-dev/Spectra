@@ -12,7 +12,7 @@ export function MainArea() {
       className="flex min-w-0 flex-1 flex-col bg-shell-bg"
       role="main"
     >
-      <div className="shrink-0 border-b border-shell-border px-4 py-2 text-sm text-gray-400">
+      <div className="shrink-0 border-b border-shell-border px-3 py-1 text-sm text-gray-400">
         {active ? active.name : 'No workspace selected'}
       </div>
       <EditorTabs />

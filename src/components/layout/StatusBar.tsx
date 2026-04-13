@@ -1,7 +1,7 @@
 import { useWorkspaceStore } from '../../stores/workspace.store';
 import { useEditorStore } from '../../stores/editor.store';
 import { useValidationStore } from '../../stores/validation.store';
-import { Circle, AlertCircle, AlertTriangle } from 'lucide-react';
+import { Circle, AlertCircle, AlertTriangle, ArrowRightIcon } from 'lucide-react';
 
 export function StatusBar() {
   const activeId = useWorkspaceStore((s) => s.activeWorkspaceId);
@@ -19,7 +19,7 @@ export function StatusBar() {
 
   return (
     <footer
-      className="flex h-6 shrink-0 items-center gap-4 border-t border-shell-border bg-blue-900/40 px-2 text-[11px] text-gray-300"
+      className="flex h-6 shrink-0 items-center gap-2 border-t border-shell-border bg-blue-900/40 px-2 text-[11px] text-gray-300"
       role="status"
     >
       <span className="font-medium">Spectra</span>
@@ -28,7 +28,7 @@ export function StatusBar() {
 
       {activeTab && (
         <>
-          <span className="text-gray-500">|</span>
+          <span className="text-gray-500"><ArrowRightIcon className='size-3' /></span>
           <span className="flex items-center gap-1">
             {activeTab.dirty && (
               <span title="Unsaved changes">

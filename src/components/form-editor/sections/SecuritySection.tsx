@@ -23,7 +23,7 @@ export function SecuritySection({ security, onChange }: Props) {
   return (
     <FormSection
       title="Security"
-      icon={<Shield className="h-3.5 w-3.5 text-amber-400" />}
+      icon={<Shield className="h-3.5 w-3.5 text-amber-500" />}
       defaultOpen={false}
     >
       <FormArrayField
