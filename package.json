@@ -15,7 +15,8 @@
     "dist": "npm run build && electron-builder",
     "preview": "node node_modules/vite/bin/vite.js preview",
     "typecheck": "node node_modules/typescript/bin/tsc --noEmit && node node_modules/typescript/bin/tsc -p tsconfig.electron.json --noEmit",
-    "rebuild:native": "npx --yes @electron/rebuild"
+    "rebuild:native": "npx --yes @electron/rebuild --module-dir . --only better-sqlite3",
+    "postinstall": "npm run rebuild:native"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
