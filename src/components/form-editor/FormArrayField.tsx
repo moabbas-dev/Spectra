@@ -4,7 +4,7 @@ import { ConfirmDeleteButton } from '../ui/ConfirmDeleteButton';
 
 interface Props<T> {
   items: T[];
-  onAdd: () => void;
+  onAdd?: () => void;
   onRemove: (index: number) => void;
   addLabel?: string;
   renderItem: (item: T, index: number) => ReactNode;
@@ -37,14 +37,16 @@ export function FormArrayField<T>({
           {renderItem(item, i)}
         </div>
       ))}
-      <button
-        type="button"
-        className="flex items-center gap-1 rounded border border-dashed border-shell-border px-2.5 py-1.5 text-xs text-gray-500 hover:border-blue-500/50 hover:text-blue-400 transition-colors"
-        onClick={onAdd}
-      >
-        <Plus className="h-3 w-3" />
-        {addLabel}
-      </button>
+      {onAdd && (
+        <button
+          type="button"
+          className="flex items-center gap-1 rounded border border-dashed border-shell-border px-2.5 py-1.5 text-xs text-gray-500 hover:border-blue-500/50 hover:text-blue-400 transition-colors"
+          onClick={onAdd}
+        >
+          <Plus className="h-3 w-3" />
+          {addLabel}
+        </button>
+      )}
     </div>
   );
 }
