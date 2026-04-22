@@ -7,9 +7,10 @@ import { ConfirmDeleteButton } from '../../ui/ConfirmDeleteButton';
 interface Props {
   paths: Record<string, PathItemObject>;
   onChange: (paths: Record<string, PathItemObject>) => void;
+  collapseToken?: number;
 }
 
-export function PathsSection({ paths, onChange }: Props) {
+export function PathsSection({ paths, onChange, collapseToken }: Props) {
   const entries = Object.entries(paths);
 
   function addPath() {
@@ -45,6 +46,7 @@ export function PathsSection({ paths, onChange }: Props) {
     <FormSection
       title="Paths"
       icon={<Route className="h-3.5 w-3.5 text-lime-500 " />}
+      collapseToken={collapseToken}
     >
       <div className="space-y-2">
         {entries.length === 0 && (

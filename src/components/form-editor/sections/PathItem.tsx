@@ -24,7 +24,7 @@ const METHOD_COLORS: Record<string, string> = {
 };
 
 export function PathItem({ path, pathItem, onChange, onChangePath }: Props) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const [localPath, setLocalPath] = useState(path);
 
   useEffect(() => {

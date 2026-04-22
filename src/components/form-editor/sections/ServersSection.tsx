@@ -7,9 +7,10 @@ import { Server } from 'lucide-react';
 interface Props {
   servers: ServerObject[];
   onChange: (servers: ServerObject[]) => void;
+  collapseToken?: number;
 }
 
-export function ServersSection({ servers, onChange }: Props) {
+export function ServersSection({ servers, onChange, collapseToken }: Props) {
   function updateServer(idx: number, partial: Partial<ServerObject>) {
     const next = servers.map((s, i) => (i === idx ? { ...s, ...partial } : s));
     onChange(next);
@@ -19,6 +20,7 @@ export function ServersSection({ servers, onChange }: Props) {
     <FormSection
       title="Servers"
       icon={<Server className="h-3.5 w-3.5 text-orange-500" />}
+      collapseToken={collapseToken}
     >
       <FormArrayField
         items={servers}

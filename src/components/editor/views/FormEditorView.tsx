@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useEditorStore } from '../../../stores/editor.store';
 import { parseOpenApiYaml, serializeOpenApiYaml } from '../../../utils/yaml.util';
 import { detectAdvancedYamlConstructs } from '../../../utils/yaml-form-compat';
@@ -12,7 +12,7 @@ import { PathsSection } from '../../form-editor/sections/PathsSection';
 import { ComponentsSection } from '../../form-editor/sections/ComponentsSection';
 import { TagsSection } from '../../form-editor/sections/TagsSection';
 import { SecuritySection } from '../../form-editor/sections/SecuritySection';
-import { AlertTriangle, Code2 } from 'lucide-react';
+import { AlertTriangle, Code2, ChevronsDownUp } from 'lucide-react';
 
 interface Props {
   specFileId: string;
@@ -23,6 +23,9 @@ export function FormEditorView({ specFileId }: Props) {
   const setTabContent = useEditorStore((s) => s.setTabContent);
   const setActiveView = useEditorStore((s) => s.setActiveView);
   const tab = tabs.find((t) => t.specFileId === specFileId);
+
+  /** Incrementing this collapses all FormSection children. */
+  const [collapseToken, setCollapseToken] = useState(0);
 
   const doc = useMemo<OpenApiDoc | null>(() => {
     if (!tab) return null;
@@ -61,6 +64,19 @@ export function FormEditorView({ specFileId }: Props) {
 
   return (
     <div className="flex-1 overflow-y-auto">
+      {/* ── Toolbar ── */}
+      <div className="sticky top-0 z-10 flex items-center justify-end bg-shell-bg border-b border-shell-border px-4 py-1.5">
+        <button
+          type="button"
+          className="flex items-center gap-1.5 rounded px-2 py-1 text-[11px] text-gray-500 hover:bg-shell-hover hover:text-gray-300 transition-colors"
+          onClick={() => setCollapseToken((n) => n + 1)}
+          title="Collapse all sections"
+        >
+          <ChevronsDownUp className="h-3.5 w-3.5" />
+          Collapse All
+        </button>
+      </div>
+
       {/* ── Advanced YAML degradation banner ── */}
       {advancedIssues.length > 0 && (
         <div className="mx-4 mt-3 flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3">
@@ -98,6 +114,7 @@ export function FormEditorView({ specFileId }: Props) {
       <InfoSection
         info={doc.info ?? { title: '', version: '' }}
         onChange={(info: InfoObject) => updateDoc((d) => ({ ...d, info }))}
+        collapseToken={collapseToken}
       />
 
       <ServersSection
@@ -108,6 +125,7 @@ export function FormEditorView({ specFileId }: Props) {
             servers: servers.length > 0 ? servers : undefined,
           }))
         }
+        collapseToken={collapseToken}
       />
 
       <PathsSection
@@ -115,6 +133,7 @@ export function FormEditorView({ specFileId }: Props) {
         onChange={(paths: Record<string, PathItemObject>) =>
           updateDoc((d) => ({ ...d, paths }))
         }
+        collapseToken={collapseToken}
       />
 
       <ComponentsSection
@@ -122,6 +141,7 @@ export function FormEditorView({ specFileId }: Props) {
         onChange={(components: ComponentsObject) =>
           updateDoc((d) => ({ ...d, components }))
         }
+        collapseToken={collapseToken}
       />
 
       <TagsSection
@@ -132,6 +152,7 @@ export function FormEditorView({ specFileId }: Props) {
             tags: tags.length > 0 ? tags : undefined,
           }))
         }
+        collapseToken={collapseToken}
       />
 
       <SecuritySection
@@ -142,6 +163,7 @@ export function FormEditorView({ specFileId }: Props) {
             security: security.length > 0 ? security : undefined,
           }))
         }
+        collapseToken={collapseToken}
       />
     </div>
   );

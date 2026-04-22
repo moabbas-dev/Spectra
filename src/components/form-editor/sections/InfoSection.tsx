@@ -7,9 +7,10 @@ import { Info } from 'lucide-react';
 interface Props {
   info: InfoObject;
   onChange: (info: InfoObject) => void;
+  collapseToken?: number;
 }
 
-export function InfoSection({ info, onChange }: Props) {
+export function InfoSection({ info, onChange, collapseToken }: Props) {
   function set<K extends keyof InfoObject>(key: K, value: InfoObject[K]) {
     onChange({ ...info, [key]: value });
   }
@@ -24,7 +25,7 @@ export function InfoSection({ info, onChange }: Props) {
   }
 
   return (
-    <FormSection title="Info" icon={<Info className="h-3.5 w-3.5 text-blue-500" />}>
+    <FormSection title="Info" icon={<Info className="h-3.5 w-3.5 text-blue-500" />} collapseToken={collapseToken}>
       <div className="grid grid-cols-2 gap-3">
         <FormField label="Title" htmlFor="info-title">
           <input

@@ -7,13 +7,14 @@ import { Tag } from 'lucide-react';
 interface Props {
   tags: TagObject[];
   onChange: (tags: TagObject[]) => void;
+  collapseToken?: number;
 }
 
 /**
  * Form section for editing OpenAPI tags[].
  * Each tag has a name, description, and optional externalDocs URL.
  */
-export function TagsSection({ tags, onChange }: Props) {
+export function TagsSection({ tags, onChange, collapseToken }: Props) {
   function updateTag(index: number, tag: TagObject) {
     const next = [...tags];
     next[index] = tag;
@@ -25,14 +26,13 @@ export function TagsSection({ tags, onChange }: Props) {
       title="Tags"
       icon={<Tag className="h-3.5 w-3.5 text-green-500" />}
       defaultOpen={false}
+      collapseToken={collapseToken}
     >
       <FormArrayField
         items={tags}
         addLabel="Add Tag"
         emptyMessage="No tags defined."
-        onAdd={() =>
-          onChange([...tags, { name: '', description: '' }])
-        }
+        onAdd={() => onChange([...tags, { name: '', description: '' }])}
         onRemove={(i) => onChange(tags.filter((_, idx) => idx !== i))}
         renderItem={(tag: TagObject, i: number) => (
           <div className="space-y-2">
@@ -42,9 +42,7 @@ export function TagsSection({ tags, onChange }: Props) {
                   id={`tag-name-${i}`}
                   className={inputClass}
                   value={tag.name}
-                  onChange={(e) =>
-                    updateTag(i, { ...tag, name: e.target.value })
-                  }
+                  onChange={(e) => updateTag(i, { ...tag, name: e.target.value })}
                   placeholder="users"
                 />
               </FormField>
@@ -70,10 +68,7 @@ export function TagsSection({ tags, onChange }: Props) {
                 className={inputClass}
                 value={tag.description ?? ''}
                 onChange={(e) =>
-                  updateTag(i, {
-                    ...tag,
-                    description: e.target.value || undefined,
-                  })
+                  updateTag(i, { ...tag, description: e.target.value || undefined })
                 }
                 placeholder="Operations related to users"
               />

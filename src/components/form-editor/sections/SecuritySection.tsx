@@ -7,13 +7,14 @@ import { Shield } from 'lucide-react';
 interface Props {
   security: SecurityRequirementObject[];
   onChange: (security: SecurityRequirementObject[]) => void;
+  collapseToken?: number;
 }
 
 /**
  * Form section for editing global security[] requirements.
  * Each requirement maps a scheme name to its scopes.
  */
-export function SecuritySection({ security, onChange }: Props) {
+export function SecuritySection({ security, onChange, collapseToken }: Props) {
   function updateRequirement(index: number, req: SecurityRequirementObject) {
     const next = [...security];
     next[index] = req;
@@ -25,6 +26,7 @@ export function SecuritySection({ security, onChange }: Props) {
       title="Security"
       icon={<Shield className="h-3.5 w-3.5 text-amber-500" />}
       defaultOpen={false}
+      collapseToken={collapseToken}
     >
       <FormArrayField
         items={security}

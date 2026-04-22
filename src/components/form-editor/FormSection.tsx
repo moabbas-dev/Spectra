@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
 interface Props {
@@ -6,10 +6,15 @@ interface Props {
   icon?: ReactNode;
   defaultOpen?: boolean;
   children: ReactNode;
+  collapseToken?: number;
 }
 
-export function FormSection({ title, icon, defaultOpen = true, children }: Props) {
+export function FormSection({ title, icon, defaultOpen = true, children, collapseToken }: Props) {
   const [open, setOpen] = useState(defaultOpen);
+
+  useEffect(() => {
+    if (collapseToken) setOpen(false);
+  }, [collapseToken]);
 
   return (
     <div className="border-b border-shell-border">

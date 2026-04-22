@@ -8,13 +8,14 @@ import { FormArrayField } from '../FormArrayField';
 interface Props {
   components: ComponentsObject;
   onChange: (components: ComponentsObject) => void;
+  collapseToken?: number;
 }
 
 /**
  * Collapsible form section for OpenAPI components.
  * Renders sub-sections for Schemas, Security Schemes, etc.
  */
-export function ComponentsSection({ components, onChange }: Props) {
+export function ComponentsSection({ components, onChange, collapseToken }: Props) {
   const schemaNames = Object.keys(components.schemas ?? {});
 
   function updateSchemas(schemas: Record<string, SchemaObject>) {
@@ -36,6 +37,7 @@ export function ComponentsSection({ components, onChange }: Props) {
       title="Components"
       icon={<Layers className="h-3.5 w-3.5 text-purple-500" />}
       defaultOpen={false}
+      collapseToken={collapseToken}
     >
       {/* Schemas */}
       <div>
